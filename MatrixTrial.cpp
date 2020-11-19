@@ -10,19 +10,19 @@ int main(){
 	
 	Matrix mat1;
 	
-	//~ Vector r1 = Vector(1, 2, 3);
-	//~ Vector r2 = Vector(4, 5, 6);
-	//~ Vector r3 = Vector(7, 8, 9);
+	Vector vec1 = Vector(1.0, 1.0, 1.0);
+	Vector vec2 = Vector(.0, 1.0, 1.0);
+	Vector vec3 = Vector(.0, .0, 1.0);
+	
+	Matrix mat4 = Matrix(vec1, vec2, vec3);
+	Matrix mat5 = inv(mat4);
 	
 	
-	//~ Matrix mat2 = Matrix(r1, r2, r3);
 	
-	//~ cout << mat2 << endl;
-	//~ cout << mat1 << endl;
-	
-	Matrix mat3 = mat1 * 2.0;
-	
-	cout << mat3 << endl;
+	cout << mat4 << endl;
+	cout << mat5 << endl;
+	cout << (mat5 * mat4) << endl;
+
 	
 	return 0;
 }

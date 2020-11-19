@@ -39,36 +39,27 @@ class Matrix{
 								
 								
 
-	friend Matrix operator *(const Matrix& a, const Matrix& b);			// matrix multiplication
-	Matrix operator *(const Matrix& other);
+	friend Matrix operator *(const Matrix& a, double b);
+	friend Matrix operator *(const Matrix& a, const Matrix& b);
+	friend Vector operator *(const Matrix& a, const Vector& b);
+	void operator *=(double b);
+	void operator *=(const Matrix& b);
 	
-	friend Vector operator *(const Matrix& a, const Vector& b);			// mat vec multiplication
-	Vector operator *(const Vector& other);
+	friend Matrix operator /(const Matrix& a, double b);
+	void operator /=(double b);
 	
-	friend Matrix operator *(const Matrix& a, double c);
-	Matrix operator *(double c);
-	Matrix operator /(double c);
-	
-	friend Matrix operator +(const Matrix& a, const Matrix& b);			// mat sum and diff
-	Matrix operator +(const Matrix& b);
+	friend Matrix operator +(const Matrix& a, const Matrix& b);
+	void operator +=(const Matrix& b);
 	
 	friend Matrix operator -(const Matrix& a, const Matrix& b);
-	Matrix operator -(const Matrix& b);
-	
-	void operator +=(const Matrix& b);									// update this
 	void operator -=(const Matrix& b);
-	void operator *=(const Matrix& b);
-	void operator *=(double c);
-	void operator /=(double c);
 	
-	friend Matrix transpose(const Matrix& b);
-	void transpose(void);
 	
-	friend double det(const Matrix& b);
-	double det(void);
+	friend double det(const Matrix& a);
+	friend bool isSingular(const Matrix& a)	{ return (det(a) == .0); }
 	
-	bool isInvertible(void)		{ return (this -> det() != .0); }
-	
+	friend Matrix transpose(const Matrix& a);
+	friend Matrix inv(const Matrix& a);
 
 	friend std::ostream& operator <<(std::ostream& os, const Matrix& a);
 	
@@ -84,145 +75,115 @@ void Matrix::buildCol(void){
 	this -> col3 = Vector(row1.z, row2.z , row3.z);
 }
 
-Matrix operator *(const Matrix& a, const Matrix& b){
-	/* Matrix matrix multiplication */
 
-	Vector resRow1 = Vector(a.row1 * b.col1, a.row1 * b.col2, a.row1 * b.col3);
-	Vector resRow2 = Vector(a.row2 * b.col1, a.row2 * b.col2, a.row2 * b.col3);
-	Vector resRow3 = Vector(a.row3 * b.col1, a.row3 * b.col2, a.row3 * b.col3);
+Matrix operator *(const Matrix& a, double b){
 	
-	return Matrix(resRow1, resRow2, resRow3);	
+	return Matrix(a.row1 * b, a.row2 * b, a.row3 * b);
 }
 
-Matrix Matrix::operator *(const Matrix& b){
-	/* Matrix matrix multiplication */
+
+Matrix operator *(const Matrix& a, const Matrix& b){
 	
-	return (*this) * b;
+	Vector res1 = Vector(a.row1 * b.col1, a.row1 * b.col2, a.row1 * b.col3);
+	Vector res2 = Vector(a.row2 * b.col1, a.row2 * b.col2, a.row2 * b.col3);
+	Vector res3 = Vector(a.row3 * b.col1, a.row3 * b.col2, a.row3 * b.col3);
+
+	return Matrix(res1, res2, res3);
 }
 
 
 Vector operator *(const Matrix& a, const Vector& b){
-	/* mat vec mult */
 	
 	return Vector(a.row1 * b, a.row2 * b, a.row3 * b);
-}	
-
-
-Vector Matrix::operator *(const Vector& b){
-	/* matrix vector multiplication */
-	
-	return (*this) * b;
-}
-
-Matrix operator *(Matrix& a, double c){
-	
-	return Matrix(a.row1 * c, a.row2 * c, a.row3 * c);
 }
 
 
-Matrix Matrix::operator *(double c){
+void Matrix::operator *=(double b){
 	
-	std::cout << 1000 << std::endl;
-	
-	Matrix res = (*this) * c;
-	
-	
-	return res;
+	*this = *this * b;
 }
 
-Matrix operator /(const Matrix& a, double c){
-	/* Division by a scalar */
+
+void Matrix::operator *=(const Matrix& b){
 	
-	assert(c != 0.0);
-	
-	return a * (1 / c);
+	*this = *this * b;
 }
 
-Matrix Matrix::operator /(double c){
+
+Matrix operator /(const Matrix& a, double b){
 	
-	return (*this) / c;
+	assert(b != .0);
+	
+	return Matrix(a.row1 / b, a.row2 / b, a.row3 / b);
 }
+
+
+void Matrix::operator /=(double b){
+	
+	*this = *this / b;
+}
+
 
 Matrix operator +(const Matrix& a, const Matrix& b){
-	/* Matrix addition */
 	
 	return Matrix(a.row1 + b.row1, a.row2 + b.row2, a.row3 + b.row3);
 }
 
-
-Matrix Matrix::operator +(const Matrix& b){
+void Matrix::operator +=(const Matrix& b){
 	
-	return (*this) + b;
+	*this = *this + b;
 }
 
 Matrix operator -(const Matrix& a, const Matrix& b){
-	/* Matrix addition */
 	
 	return Matrix(a.row1 - b.row1, a.row2 - b.row2, a.row3 - b.row3);
 }
 
-
-Matrix Matrix::operator -(const Matrix& b){
-	
-	return (*this) - b;
-}
-
-
-void Matrix::operator +=(const Matrix& b){
-	
-	(*this) = (*this) + b;
-}
-
 void Matrix::operator -=(const Matrix& b){
-
-	(*this) = (*this) - b;
-}
-
-void Matrix::operator *=(const Matrix& b){
-
-	(*this) = (*this) * b;
-}
-
-void Matrix::operator *=(double b){
 	
-	(*this) = (*this) * b;
-}
-
-void Matrix::operator /=(double b){
-	
-	(*this) = (*this) / b;
+	*this = *this - b;
 }
 
 
-//~ Matrix transpose(const Matrix& a){
+
+double det(const Matrix& a){
 	
-	//~ return Matrix(a.col1, a.col2, a.col2);
-//~ }
+	return a.row1.x * a.row2.y * a.row3.z + 
+		   a.row1.y * a.row2.z * a.row3.x + 
+		   a.row1.z * a.row2.x * a.row3.y - 
+		   a.row1.z * a.row2.y * a.row3.x - 
+		   a.row1.x * a.row2.z * a.row3.y - 
+		   a.row1.y * a.row2.x * a.row3.z;
+} 
 
-//~ void Matrix::transpose(void){
-	//~ /* Transposition */
 
-	//~ *this = transpose(*this);
-//~ }
-
-//~ double det(const Matrix& b){
-	//~ /* Calculates the determinant of b */
+Matrix transpose(const Matrix& a){
 	
-	//~ return b.row1.x * b.row2.y * b.row3.z + 
-		   //~ b.row1.y * b.row2.z * b.row3.x +
-		   //~ b.row1.z * b.row2.x * b.row3.y -
-		   //~ b.row1.z * b.row2.y * b.row3.x -
-	       //~ b.row1.y * b.row2.x * b.row3.z -
-	       //~ b.row1.x * b.row2.z * b.row3.y;
-//~ }
+	return Matrix(a.col1, a.col2, a.col3);
+}
+
+
+Matrix inv(const Matrix& a){
 	
-
-//~ double Matrix::det(void){
+	double dt = det(a);
 	
-	//~ return det(*this);
-//~ }	
-
-
+	assert(dt != .0);
+	
+	Vector r1 = Vector(a.row2.y * a.row3.z - a.row2.z * a.row3.y,
+					   a.row2.z * a.row3.x - a.row2.x * a.row3.z,
+					   a.row2.x * a.row3.y - a.row2.y * a.row3.x);
+	
+	Vector r2 = Vector(a.row3.y * a.row1.z - a.row3.z * a.row1.y,
+					   a.row3.z * a.row1.x - a.row3.x * a.row1.z,
+					   a.row3.x * a.row1.y - a.row3.y * a.row1.x);
+	
+	Vector r3 = Vector(a.row1.y * a.row2.z - a.row1.z * a.row2.y,
+    				   a.row1.z * a.row2.x - a.row1.x * a.row2.z,
+    				   a.row1.x * a.row2.y - a.row1.y * a.row2.x);
+    
+    return transpose(Matrix(r1, r2, r3)) / dt;
+}
+    
 std::ostream& operator <<(std::ostream& os, const Matrix& a){
 	
 	os << a.row1.x << ' ' << a.row1.y << ' ' << a.row1.z << '\n' <<

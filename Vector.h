@@ -25,11 +25,9 @@ class Vector{
 	friend Vector operator -(const Vector& a, const Vector& b);
 	friend double operator *(const Vector& a, const Vector& b);			// scalar product
 	
-	template <typename T>
-	friend Vector operator *(const Vector& a, T c);
+	friend Vector operator *(const Vector& a, double c);
 	
-	template <typename T>
-	friend Vector operator /(const Vector& a, T c);
+	friend Vector operator /(const Vector& a, double c);
 	
 	friend Vector operator ^(const Vector& a, const Vector& b);			// vector product
 	friend bool operator ==(const Vector& a, const Vector& b);
@@ -37,14 +35,12 @@ class Vector{
 	
 	double& operator [](const int indx);								// indexing
 	
-	Vector& operator +=(const Vector &a);
-	Vector& operator -=(const Vector &b);
-	
-	template <typename T>
-	Vector& operator *=(T c);
-	
-	template <typename T>
-	Vector& operator /=(T c);
+	void operator +=(const Vector &a);
+	void operator -=(const Vector &b);
+
+	void operator *=(double c);
+
+	void operator /=(double c);
 
 	friend std::ostream& operator <<(std::ostream& os, const Vector& a);
 	
@@ -55,7 +51,6 @@ class Vector{
 	friend Vector normalize(Vector& a);
 
 	friend double distance(Vector& a, Vector& b);
-	double distance(Vector& b);
 };
 
 
@@ -79,20 +74,18 @@ double operator *(const Vector& a, const Vector& b){
 }
 	
 
-template <typename T>
-Vector operator *(const Vector& a, T c){
+Vector operator *(const Vector& a, double c){
 	/* Product by a constant */
 	
-	return Vector(a.x * double(c), a.y * double(c), a.z * double(c));
+	return Vector(a.x * c, a.y * c, a.z * c);
 } 
 
-template <typename T>
-Vector operator /(const Vector& a, T c){
+Vector operator /(const Vector& a, double c){
 	/* Product by a constant */
 	
-	assert(double(c) != .0);
+	assert(c != .0);
 	
-	return Vector(a.x / double(c), a.y / double(c), a.z / double(c));
+	return Vector(a.x / c, a.y / c, a.z / c);
 } 
 
 
@@ -130,34 +123,24 @@ double& Vector::operator [](const int indx){
 }
 
 
-Vector& Vector::operator +=(const Vector &b){
+void Vector::operator +=(const Vector &b){
 	
 	*this = *this + b;
-	
-	return *this;
 }
 
-Vector& Vector::operator -=(const Vector &b){
+void Vector::operator -=(const Vector &b){
 	
 	*this = *this - b;
-	
-	return *this;
 }
 
-template <typename T>
-Vector& Vector::operator *=(T c){
+void Vector::operator *=(double c){
 	
 	*this = *this * c;
-	
-	return *this;
 }
 
-template <typename T>
-Vector& Vector::operator /=(T c){
+void Vector::operator /=(double c){
 	
 	*this = *this / c;
-	
-	return *this;
 }
 
 std::ostream& operator <<(std::ostream& os, const Vector& a){
@@ -201,8 +184,4 @@ double distance(Vector& a, Vector& b){
 	return norm(c);
 }
 
-//~ double Vector::distance(Vector& b){
-	
-	//~ return distance(*this, b);
-//~ }
 
