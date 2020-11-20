@@ -1,13 +1,14 @@
+#pragma once
+
 #include <iostream>
 #include <assert.h>
+#include "Vector.h"
 
 using namespace std;
 
-class Vector;
-
 class Matrix{
 	
-	private:
+	protected:
 	
 	void buildCol(void);
 	
@@ -83,7 +84,7 @@ Matrix operator *(const Matrix& a, double b){
 
 
 Matrix operator *(const Matrix& a, const Matrix& b){
-	
+
 	Vector res1 = Vector(a.row1 * b.col1, a.row1 * b.col2, a.row1 * b.col3);
 	Vector res2 = Vector(a.row2 * b.col1, a.row2 * b.col2, a.row2 * b.col3);
 	Vector res3 = Vector(a.row3 * b.col1, a.row3 * b.col2, a.row3 * b.col3);
