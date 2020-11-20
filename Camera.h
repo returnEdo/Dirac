@@ -30,8 +30,15 @@ class Camera{
 		H(DEFAULT_HEIGHT)						{}
 	
 	friend class Object;
+	
+	void changeFOV(double deltaTheta);
 };
 
+
+void Camera::changeFOV(double deltaPhi){
+	
+	this -> phi += deltaPhi;
+}
 
 
 /* add update w, h to cam */

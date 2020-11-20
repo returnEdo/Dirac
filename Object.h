@@ -22,11 +22,16 @@ class Object{
 	
 	double z0;
 	
+	vector<vector<int> > indexBuffer;											// index buffer (group of three)
 	
 	public:
 	
-	Object(const vector<Vector>& xM0, const Vector& xcg0 = Vector(),
-		   const Vector& theta0 = Vector(), double z00 = 1.0):
+	Object(const vector<vector<int> >& iB,
+		   const vector<Vector>& xM0,
+		   const Vector& xcg0 = Vector(),
+		   const Vector& theta0 = Vector(),
+		   double z00 = 1.0):
+			indexBuffer(iB),
 	    	xM(xM0),
 	    	xN(xM0),
 	    	xP(xM0),
@@ -36,6 +41,7 @@ class Object{
 	    	z0(z00)					{}		   
 		   
 	Object(const Object& obj):
+		indexBuffer(obj.indexBuffer),
 		xM(obj.xM),
 		xN(obj.xN),
 		xP(obj.xP),
@@ -49,6 +55,7 @@ class Object{
 	void updateNormalizedVertices(const Camera& cam);
 	
 	const vector<Vector>& getNormalizedVertices(void) const;
+	const vector<vector<int> >& getIndexBuffer(void) const;
 	void updateAttitude(double delta)	{ theta.x += delta; }			// this shit is only for debugging
 };
 
@@ -66,11 +73,6 @@ void Object::updateCamVertices(const Camera& cam){
 		(this -> xC).push_back(MthetaCam * ((Mtheta * mVertex) * z0 +
 				this -> xcg - cam.xCam));
 	}
-	
-	//~ cout << (this -> xC)[0] << endl;
-	//~ cout << (this -> xC)[1] << endl;
-	//~ cout << (this -> xC)[2] << endl;
-	//~ cout << (this -> xC)[3] << endl;
 }
 
 
@@ -90,11 +92,8 @@ void Object::updatePixelVertices(const Camera& cam){
 									  cam.W / 2.0 * (cam.H / cam.W - cVertex.x / (cVertex.z * tphi)),
 									  cVertex.z));
 	}
-	//~ cout << (this -> xP)[0] << endl;
-	//~ cout << (this -> xP)[1] << endl;
-	//~ cout << (this -> xP)[2] << endl;
-	//~ cout << (this -> xP)[3] << endl;
 }
+
 
 void Object::updateNormalizedVertices(const Camera& cam){
 	/* Finds the vertices in the normalized frame ready to be displayed */
@@ -111,11 +110,9 @@ void Object::updateNormalizedVertices(const Camera& cam){
 									  cam.W / cam.H * cVertex.x / (cVertex.z * tphi),
 									  cVertex.z));
 	}
-	cout << (this -> xN)[0] << endl;
-	cout << (this -> xN)[1] << endl;
-	cout << (this -> xN)[2] << endl;
-	//~ cout << (this -> xN)[3] << endl;
 }
 
 
 const vector<Vector>& Object::getNormalizedVertices(void) const { return (this -> xN); }
+
+const vector<vector<int> >& Object::getIndexBuffer(void) const { return (this -> indexBuffer); }
