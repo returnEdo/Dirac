@@ -97,3 +97,20 @@ $$
 $$
 \text{the position of the cam in the world frame } x_{cam}^w
 $$
+---
+### Our first fundamental equation
+We can now combine the transformation from the model to the world with the transformation from the world to the camera frame, and find the following:
+$$
+r_{v}^C = M^T(\theta_{cam})[ M(\theta) Z x_v^M + x_{cg}^w - x_{cam}^W ]
+$$
+Notice this transformation has to be applied to each of the vertices of each object...the cool thing is that it enters in almost this form in the engine. For instance in `EFEngine` we can find:
+
+~~~c++
+for (auto const& mVertex: this -> xM){
+    (this -> xC).push_back(MthetaCam * ((Mtheta * mVertex) * z0 +
+    this -> xcg - cam.xCam));
+}
+~~~
+### To the projection
+We are not done yet...since the screen is two dimensional and the scene is three dimensional we need to project our vertices in a plane. The plane is positioned at distance _p_ from the camera and its aspect ratio depends on the dimension of the window (width and height).
+To project on a plane we can assume that the points laying in the same line will be projected in the same point, in other words, denoting with **V** our new 2D frame we can easiliy find that the transformation is by no means injective (in that it maps infinte points in only one)

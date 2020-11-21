@@ -10,12 +10,19 @@
 
 
 Vector xCam0 = Vector(.0, .0, -10);
-Vector xcg0 = Vector(.0, .0, .0);
+Vector xcg0 = Vector(.0, 2, .0);
 Vector theta0 = Vector(0, 0, 0);
 
 Camera cam = Camera(xCam0, Vector(), M_PI / 4);
 Cube obj = Cube(xcg0, theta0);
 
+
+
+void putPixel(double x, double y){
+	
+	glColor3d(1, 0, 0);
+	glVertex2d(.0, .0);
+}
 
 
 
@@ -31,12 +38,17 @@ void display(){
 
 	for (auto const& side: b){
 		
+		glBegin(GL_POINTS);
+		glColor3d(1, 0, 0);
+		glVertex2d(.0, .0);
+		glEnd();
+		
 		glBegin(GL_LINE_LOOP);
 		glColor3d(1, 1, 1);		
 		
-		glVertex3d(vr[side[0]].x, vr[side[0]].y, 0);
-		glVertex3d(vr[side[1]].x, vr[side[1]].y, 0);
-		glVertex3d(vr[side[2]].x, vr[side[2]].y, 0);
+		glVertex2d(vr[side[0]].x, vr[side[0]].y);
+		glVertex2d(vr[side[1]].x, vr[side[1]].y);
+		glVertex2d(vr[side[2]].x, vr[side[2]].y);
 
 		glEnd();
 	}
@@ -63,13 +75,11 @@ int main(int argc, char* argv[]){
 	
 	glutInit(&argc,argv);
 	
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+	glutInitDisplayMode(GLUT_RGB);
 
 	glutInitWindowSize(1200, 800);
 	
 	glutCreateWindow("");
-	
-	glEnable(GL_DEPTH_TEST);
 	
 	
 	glutDisplayFunc(display);
