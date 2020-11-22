@@ -23,6 +23,8 @@ void rasterizeFlatBottom(Vector& vtop, Vector& vright, Vector& vleft){
 		vleft = temp;
 	}
 	
+	cout << vright.x << endl;
+	
 	vector<vector<int> > bufferRight;
 	vector<vector<int> > bufferLeft;
 	
@@ -32,14 +34,13 @@ void rasterizeFlatBottom(Vector& vtop, Vector& vright, Vector& vleft){
 	
 	rasterizeLineForTriangles(int(floor(vtop.x)), int(floor(vtop.y)), int(floor(vleft.x)),
 							  int(floor(vleft.y)), bufferLeft);
-	
 	int len = bufferRight.size();
 	
 	int xpos = vtop.x;
 	for(int i = 0; i < len; i++){
-		
+
 		for (int xpos = bufferLeft[i][0]; xpos <= bufferRight[i][0]; xpos++){
-			
+
 			putPixel(xpos, vtop.y - i);
 		}
 	}
@@ -125,20 +126,22 @@ void rasterizeTriangle(vector<Vector>& vecs){
 	if (vecs[1].y == vecs[2].y){ 
 		
 		/* Flat top case */
-		
+		cout << " flat top " << endl;
 		rasterizeFlatTop(vecs[0], vecs[1], vecs[2]);
 	}
 	else if (vecs[0].y == vecs[1].y){
-		
+		cout << "flta bottom"<< endl;
 		/* Flat bottom case */
 		rasterizeFlatBottom(vecs[2], vecs[0], vecs[1]);
 	}
 
 	else{
+		cout << "both" << endl;
+		Vector vec4 = Vector(vecs[0].x + (vecs[1].y - vecs[0].y) * (vecs[2].x - vecs[0].x) / (vecs[2].y - vecs[0].y),
+							 vecs[1].y,
+							 vecs[0].z + (vecs[1].y - vecs[0].y) * (vecs[1].z - vecs[0].z) / (vecs[2].y - vecs[0].y));
 		
-		Vector vec4 = {vecs[1].y,
-					   vecs[0].y + (vecs[2].y - vecs[0].y) * (vecs[1].x - vecs[0].x) / (vecs[2].x - vecs[0].x),
-					   vecs[0].z + (vecs[2].z - vecs[0].z) * (vecs[1].x - vecs[0].x) / (vecs[2].x - vecs[0].x)};
+		cout <<vec4.x << vec4.y << vec4.z << endl;
 		
 		rasterizeFlatBottom(vecs[2], vecs[1], vec4);
 		rasterizeFlatTop(vecs[0], vecs[1], vec4);
