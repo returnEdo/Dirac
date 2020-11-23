@@ -41,4 +41,3 @@ void Camera::changeFOV(double deltaPhi){
 }
 
 
-/* add update w, h to cam */
