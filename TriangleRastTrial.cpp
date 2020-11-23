@@ -19,8 +19,8 @@ using namespace std;
 void render(void){
 
 	vector<Vector> Vectors = {Vector(.0, .0, .0),
-							  Vector(100.0, .0, .0),
-							  Vector(50.0, 100.0, .0)};
+							  Vector(-300, -51, .0),
+							  Vector(50, -50, .0)};
 	
 	glClear(GL_COLOR_BUFFER_BIT);
 
