@@ -240,17 +240,21 @@ void rasterizeFlatBottom(Vector& vtop, Vector& vright, Vector& vleft, const vect
 
 	int n = bufferRight.size();
 	int x, y;
-
+	cout << bufferRight.size() << bufferLeft.size() << endl;
 	// this is the scanning line algorithm
-	for (int i = 0; i < n; i++){
+	
+	if (bufferLeft.size() == n){
+		for (int i = 0; i < n; i++){
+			
+			y = bufferRight[i][1];
+
+			for (x = bufferLeft[i][0]; x <= bufferRight[i][0]; x++){
+
+				/* TODO: z depth test  */
+
+				putPixel(x, y, col);
 		
-		y = bufferRight[i][1];
-
-		for (x = bufferLeft[i][0]; x <= bufferRight[i][0]; x++){
-
-			/* TODO: z depth test  */
-
-			putPixel(x, y, col);
+			}
 		}
 	}
 }
@@ -279,21 +283,22 @@ void rasterizeFlatTop(Vector& vbottom, Vector& vright, Vector& vleft, const vect
 
 	int n = bufferRight.size();
 	int x, y;
-
+	cout << bufferRight.size() << bufferLeft.size() << endl;
 	// this is the scanning line algorithm
-	for (int i = 0; i < n; i++){
-		
-		y = bufferRight[i][1];
+	if (bufferLeft.size() == n){							// Need to understand why sometimes they have different lenghts
+		for (int i = 0; i < n; i++){
+			
+			y = bufferRight[i][1];
 
-		for (x = bufferLeft[i][0]; x <= bufferRight[i][0]; x++){
+			for (x = bufferLeft[i][0]; x <= bufferRight[i][0]; x++){
 
-			/* TODO: z depth test  */
+				/* TODO: z depth test  */
 
-			putPixel(x, y, col);
+				putPixel(x, y, col);
+			}
 		}
 	}
 }
-
 
 
 
@@ -342,7 +347,6 @@ void rasterizeObject(const Object& obj){			// should be friend with the object
 		       			static_cast<double>(rand() / roof), 
 					static_cast<double>(rand() / roof)};
 
-		cout << temp[0] << "\t" << color[0] << endl;	
 
 		rasterizeTriangle(temp, color);
 	}

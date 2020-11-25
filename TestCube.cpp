@@ -35,7 +35,7 @@ void display(void){
 
 void special(int key, int x, int y){
 	
-	cb.updateAttitude(.2);
+	cb.updateAttitude(.3);
 	glutPostRedisplay();	// or even display
 }
 
