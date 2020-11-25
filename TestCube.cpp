@@ -9,7 +9,7 @@ using namespace std;
 	
 Vector theta0 = Vector();
 Vector x0 = Vector(.0, .0, -10.0);
-Vector xg0 = Vector(.0, .0, -10.0);
+Vector xg0 = Vector(.0, .0, 0.0);
 
 
 Camera cam = Camera(x0, theta0);
