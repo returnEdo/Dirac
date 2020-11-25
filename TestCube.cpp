@@ -1,5 +1,5 @@
 #include <GL/glut.h>
-#include "Triangle.h"
+#include "Cube.h"
 #include "Camera.h"
 #include <vector>
 #include "Vector.h"
@@ -9,11 +9,11 @@ using namespace std;
 	
 Vector theta0 = Vector();
 Vector x0 = Vector(.0, .0, -10.0);
-Vector xg0 = Vector(.0, .0, 0.0);
+Vector xg0 = Vector(.0, .0, -10.0);
 
 
 Camera cam = Camera(x0, theta0);
-Triangle cb = Triangle(xg0);
+Cube cb = Cube(xg0);
 	
 
 

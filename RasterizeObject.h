@@ -226,13 +226,11 @@ void rasterizeFlatBottom(Vector& vtop, Vector& vright, Vector& vleft, const vect
 
 	// swapper
 	if (vright.x < vleft.x){
-		cout << "SWap em all" << endl;
 
 		Vector vtemp = vright;	
 		vright = vleft;
 		vleft = vtemp;	
 	}
-	cout << vright.x << "\tciao" << vleft.x << endl;
 
 	vector<vector<int> > bufferRight;	// these two contains pixel coordinates 
 	vector<vector<int> > bufferLeft;	
@@ -304,27 +302,20 @@ void rasterizeTriangle(vector<Vector>& vecs, const vector<double>& col){
 
 	sort(vecs);			// orders the triangles in incresing y order
 	
-	cout << vecs[0] << endl;
-	cout << vecs[1] << endl;
-	cout << vecs[2] << endl;
-
-
 
 	if (vecs[0].y == vecs[1].y){
-		cout << "Flat bottom" << endl;
 		/* We have a flat bottom triangle   */
 
 		rasterizeFlatBottom(vecs[2], vecs[0], vecs[1], col);
 	}
 	else if (vecs[1].y == vecs[2].y){
-		cout << "Flat top" << endl;
 		/* We have a flat top triangle  */
 
 		rasterizeFlatTop(vecs[0], vecs[1], vecs[2], col);
 	}
 	else{
 		/* Comomn triangle  */
-		cout << "Not flat" << endl;
+	
 		Vector v4 = Vector(vecs[0].x + (vecs[1].y - vecs[0].y) * (vecs[2].x - vecs[0].x) / (vecs[2].y - vecs[0].y),
 							 vecs[1].y,
 							 vecs[0].z + (vecs[1].y - vecs[0].y) * (vecs[1].z - vecs[0].z) / (vecs[2].y - vecs[0].y));
@@ -342,11 +333,17 @@ void rasterizeObject(const Object& obj){			// should be friend with the object
 
 	for (auto &index: obj.indexBuffer){
 
-		vector<Vector> temp = { obj.xM[index[0]],
-					obj.xM[index[1]],
-					obj.xM[index[2]]};
+		vector<Vector> temp = { obj.xP[index[0]],
+					obj.xP[index[1]],
+					obj.xP[index[2]]};
+		
+		double roof = static_cast<double> (RAND_MAX);
+		vector<double> color = {static_cast<double>(rand() / roof),
+		       			static_cast<double>(rand() / roof), 
+					static_cast<double>(rand() / roof)};
 
-		vector<double> color = {rand() / RAND_MAX, rand() / RAND_MAX, rand() / RAND_MAX};
+		cout << temp[0] << "\t" << color[0] << endl;	
+
 		rasterizeTriangle(temp, color);
 	}
 }
