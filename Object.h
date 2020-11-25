@@ -7,6 +7,8 @@
 #include "Rotation.h"
 #include "Camera.h"
 
+class Rasterizer;
+
 
 class Object{
 	
@@ -14,7 +16,7 @@ class Object{
 	
 	vector<Vector> xM;													// model vertices
 	vector<Vector> xN;													// normalized vertices
-	vector<Vector> xP;													// pixel frame
+	vector<Vector> xP;													// pixel frame (refactored are centered)
 	vector<Vector> xC;													// cam basis
 	
 	Vector xcg;															// center of mass position
@@ -57,6 +59,8 @@ class Object{
 	const vector<Vector>& getNormalizedVertices(void) const;
 	const vector<vector<int> >& getIndexBuffer(void) const;
 	void updateAttitude(double delta)	{ theta.x += delta; }			// this shit is only for debugging
+	
+	friend void rasterizeObject(const Object&);
 };
 
 
@@ -88,9 +92,9 @@ void Object::updatePixelVertices(const Camera& cam){
 	
 	for (auto const& cVertex: this -> xC){
 		
-		(this -> xP).push_back(Vector(cam.W / 2.0 * (1.0 + cVertex.y / (cVertex.z * tphi)),
-									  cam.W / 2.0 * (cam.H / cam.W - cVertex.x / (cVertex.z * tphi)),
-									  cVertex.z));
+		(this -> xP).push_back(Vector(cam.W / 2.0 * cVertex.y / (cVertex.z * tphi),
+					      cam.W / 2.0 *cVertex.x / (cVertex.z * tphi),
+					      cVertex.z));
 	}
 }
 
