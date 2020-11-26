@@ -3,7 +3,7 @@
 #include <iostream>
 #include <cmath>
 #include "Vector.h"
-#include "Object.h"
+#include "Object2.h"
 
 
 #define DEFAULT_WIDTH 1200.0
