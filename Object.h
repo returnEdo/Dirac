@@ -61,6 +61,7 @@ class Object{
 	void updateAttitude(double delta)	{ theta.x += delta; }			// this shit is only for debugging
 	
 	friend void rasterizeObject(const Object&);
+	friend Rasterizer;
 };
 
 
