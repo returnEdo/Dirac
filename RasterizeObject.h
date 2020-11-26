@@ -4,79 +4,14 @@
 #include <algorithm>
 #include <vector>
 #include <array>
-#include <iostream>
-#include <memory>
 #include "Vector.h"
-#include <stdlib.h>
-#include <GL/glut.h>
-
-#ifndef DEFAULT_WIDTH
-#define DEFAULT_WIDTH 1200
-#endif
-
-#ifndef DEFAULT_HEIGHT
-#define DEFAULT_HEIGHT 800
-#endif
-
-
-#define LENGTH (DEFAULT_HEIGHT * DEFAULT_WIDTH)
-
-using namespace std;
+#include <stdlib.h>		// random color for the pixel
+#include <GL/glut.h>		// to color the pixel
 
 
 
 
-struct rastStruct{
-
-	int D;
-	int x1;
-
-	int deltax;
-	int deltay;
-};
-
-
-
-
-class Rasterizer{
-
-	private:
-	
-	vector<shared_ptr<Object> > objectPtrs;			// objects to be rendered
-	array<double, static_cast<int>(LENGTH)> depthBuffer;
-
-	void sort(vector<Vector>& vectors);
-	void computePoints(rastStruct& rast,  vector<vector<int> >& buffer);
-	void computePointsForTriangles(rastStruct& rast, vector<vector<int> >& buffer, int xpos);
-
-	public:
-
-	Rasterizer(Object& obj)	{ objectPtrs.emplace_back(&obj); }
-	Rasterizer(void)	{}
-
-
-	void putPixel(int x, int y, const vector<double>& col);
-	void rasterizeLine(const Vector& xx0, const Vector& xx1, vector<vector<int> >& buffer);
-
-	void flatBottom(Vector& vtop, Vector& vright, Vector& vleft, const vector<double>& color);
-	void flatTop(Vector& vbottom, Vector& vright, Vector& vleft, const vector<double>& color);
-	void rasterizeTriangle(vector<Vector>& vectors, const vector<double>& color);	
-
-	void render(void);
-	void addObject(Object& obj);
-};
-
-
-
-void Rasterizer::addObject(Object& obj){
-	/* Simply add an object to the render list  */
-
-	(this -> objectPtrs).emplace_back(&obj);
-}
-
-
-
-void Rasterizer::putPixel(int x, int y, const vector<double>& col){
+void putPixel(int x, int y, const vector<double>& col){
 	/* Puts a pixel in x y  */
 	
 	/* TODO: add shaders  */
@@ -86,7 +21,7 @@ void Rasterizer::putPixel(int x, int y, const vector<double>& col){
 
 
 
-void Rasterizer::sort(vector<Vector>& vectors){
+void sort(vector<Vector>& vectors){
 	/* Increasing y bubble sort of the vertices */
 	bool change = true;
 	
@@ -110,7 +45,21 @@ void Rasterizer::sort(vector<Vector>& vectors){
 
 
 
-void Rasterizer::computePoints(rastStruct& rast,  vector<vector<int> >& buffer){
+
+struct rastStruct{
+
+	int D;
+	int x1;
+
+	int deltax;
+	int deltay;
+};
+
+
+
+
+
+void computePoints(rastStruct& rast,  vector<vector<int> >& buffer){
 	/* line rasterazation algorithm */
 
 	vector<int> BufferBack = buffer.back();
@@ -136,7 +85,7 @@ void Rasterizer::computePoints(rastStruct& rast,  vector<vector<int> >& buffer){
 
 
 
-void Rasterizer::computePointsForTriangles(rastStruct& rast, vector<vector<int> >& buffer, int xpos){
+void computePointsForTriangles(rastStruct& rast, vector<vector<int> >& buffer, int xpos){
 	/* line rasterazation algorithm corrected for triangles */
 
 	vector<int> BufferBack = buffer.back();
@@ -162,7 +111,7 @@ void Rasterizer::computePointsForTriangles(rastStruct& rast, vector<vector<int> 
 
 
 
-void Rasterizer::rasterizeLine(const Vector& xx0, const Vector& xx1, vector<vector<int> >& buffer){
+void rasterizeLine(const Vector& xx0, const Vector& xx1, vector<vector<int> >& buffer){
 	/* Line rasterazation 
 	 * Buffer pixel will always start from x0, y0 */
 	 
@@ -271,7 +220,7 @@ void Rasterizer::rasterizeLine(const Vector& xx0, const Vector& xx1, vector<vect
 
 
 
-void Rasterizer::flatBottom(Vector& vtop, Vector& vright, Vector& vleft, const vector<double>& col){
+void rasterizeFlatBottom(Vector& vtop, Vector& vright, Vector& vleft, const vector<double>& col){
 	/* Rasterizes flat bottom triangles  */
 	
 
@@ -291,6 +240,7 @@ void Rasterizer::flatBottom(Vector& vtop, Vector& vright, Vector& vleft, const v
 
 	int n = bufferRight.size();
 	int x, y;
+	cout << bufferRight.size() << bufferLeft.size() << endl;
 	// this is the scanning line algorithm
 	
 	if (bufferLeft.size() == n){
@@ -311,7 +261,7 @@ void Rasterizer::flatBottom(Vector& vtop, Vector& vright, Vector& vleft, const v
 
 
 
-void Rasterizer::flatTop(Vector& vbottom, Vector& vright, Vector& vleft, const vector<double>& col){
+void rasterizeFlatTop(Vector& vbottom, Vector& vright, Vector& vleft, const vector<double>& col){
 	/* Rasterizes flat top triangles  */
 	
 
@@ -333,9 +283,7 @@ void Rasterizer::flatTop(Vector& vbottom, Vector& vright, Vector& vleft, const v
 
 	int n = bufferRight.size();
 	int x, y;
-	
-	cout << bufferRight.size() << "\t" << bufferLeft.size() << endl;
-
+	cout << bufferRight.size() << bufferLeft.size() << endl;
 	// this is the scanning line algorithm
 	if (bufferLeft.size() == n){							// Need to understand why sometimes they have different lenghts
 		for (int i = 0; i < n; i++){
@@ -354,21 +302,21 @@ void Rasterizer::flatTop(Vector& vbottom, Vector& vright, Vector& vleft, const v
 
 
 
-void Rasterizer::rasterizeTriangle(vector<Vector>& vecs, const vector<double>& col){
+void rasterizeTriangle(vector<Vector>& vecs, const vector<double>& col){
 	/* Draws the triangle on screen  */	
 
-	this -> sort(vecs);			// orders the triangles in incresing y order
+	sort(vecs);			// orders the triangles in incresing y order
 	
 
 	if (vecs[0].y == vecs[1].y){
 		/* We have a flat bottom triangle   */
 
-		this -> flatBottom(vecs[2], vecs[0], vecs[1], col);
+		rasterizeFlatBottom(vecs[2], vecs[0], vecs[1], col);
 	}
 	else if (vecs[1].y == vecs[2].y){
 		/* We have a flat top triangle  */
 
-		this -> flatTop(vecs[0], vecs[1], vecs[2], col);
+		rasterizeFlatTop(vecs[0], vecs[1], vecs[2], col);
 	}
 	else{
 		/* Comomn triangle  */
@@ -378,36 +326,30 @@ void Rasterizer::rasterizeTriangle(vector<Vector>& vecs, const vector<double>& c
 							 vecs[0].z + (vecs[1].y - vecs[0].y) * (vecs[1].z - vecs[0].z) / (vecs[2].y - vecs[0].y));
 		
 
-		this -> flatBottom(vecs[2], vecs[1], v4, col);			// v2 and v1 are the "highest" vertices
-		this -> flatTop(vecs[0], vecs[1], v4, col);				// v0 and v1 are the "lowest" vertices
+		rasterizeFlatBottom(vecs[2], vecs[1], v4, col);			// v2 and v1 are the "highest" vertices
+		rasterizeFlatTop(vecs[0], vecs[1], v4, col);				// v0 and v1 are the "lowest" vertices
 	}
 }
 
 
 
-void Rasterizer::render(void){
-	/* Renders all the objects on the render list  */
-	
-	/* TODO: add friend to obj class  */
+void rasterizeObject(const Object& obj){			// should be friend with the object
+	/* Rasterizes the mesh of an object */
 
-	for (auto & obj: this -> objectPtrs){
+	for (auto &index: obj.indexBuffer){
 
-		for (auto &index: obj -> indexBuffer){
+		vector<Vector> temp = { obj.xP[index[0]],
+					obj.xP[index[1]],
+					obj.xP[index[2]]};
+		
+		double roof = static_cast<double> (RAND_MAX);
+		vector<double> color = {static_cast<double>(rand() / roof),
+		       			static_cast<double>(rand() / roof), 
+					static_cast<double>(rand() / roof)};
 
-			vector<Vector> temp = { obj -> xP[index[0]],
-						obj -> xP[index[1]],
-						obj -> xP[index[2]]};
-			
-			double roof = static_cast<double> (RAND_MAX);
-			vector<double> color = {static_cast<double>(rand() / roof),
-						static_cast<double>(rand() / roof), 
-						static_cast<double>(rand() / roof)};
 
-			cout << temp[0] << "\t" << color[0] << endl;
-			this -> rasterizeTriangle(temp, color);
-		}
+		rasterizeTriangle(temp, color);
 	}
-
 }
 
 
