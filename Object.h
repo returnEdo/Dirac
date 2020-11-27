@@ -14,17 +14,17 @@ class Object{
 	
 	protected:
 	
-	vector<Vector> xM;													// model vertices
-	vector<Vector> xN;													// normalized vertices
-	vector<Vector> xP;													// pixel frame (refactored are centered)
-	vector<Vector> xC;													// cam basis
+	vector<vector<Vector> > x;	// M, W, C, P												// model vertices
+	vector<vector<double> > color;		// color of the face
+	vector<vector<int> > indexBuffer;											// index buffer (group of three)
 	
-	Vector xcg;															// center of mass position
-	Vector theta;														// Euler angles
-	
+	Vector xcg;
+	Vector theta;
+
+
+	int n;
 	double z0;
 	
-	vector<vector<int> > indexBuffer;											// index buffer (group of three)
 	
 	public:
 	
@@ -32,92 +32,99 @@ class Object{
 		   const vector<Vector>& xM0,
 		   const Vector& xcg0 = Vector(),
 		   const Vector& theta0 = Vector(),
-		   double z00 = 1.0):
-			indexBuffer(iB),
-	    	xM(xM0),
-	    	xN(xM0),
-	    	xP(xM0),
-	    	xC(xM0),
-	    	xcg(xcg0),
-	    	theta(theta0),
-	    	z0(z00)					{}		   
+		   const vector<vector<double> >& clr = {{}},
+		   double z00 = 1.0);
 		   
 	Object(const Object& obj):
 		indexBuffer(obj.indexBuffer),
-		xM(obj.xM),
-		xN(obj.xN),
-		xP(obj.xP),
-		xC(obj.xC),
+		x(obj.x),
 		xcg(obj.xcg),
 		theta(obj.theta),
-		z0(obj.z0)					{}
+		z0(obj.z0),
+		color(obj.color),
+		n(obj.n)	{}
 		
-	void updateCamVertices(const Camera& cam);
-	void updatePixelVertices(const Camera& cam);
-	void updateNormalizedVertices(const Camera& cam);
+	void updateVertices(const Camera& cam);
 	
-	const vector<Vector>& getNormalizedVertices(void) const;
 	const vector<vector<int> >& getIndexBuffer(void) const;
 	void updateAttitude(double delta)	{ theta.x += delta; }			// this shit is only for debugging
-	
+
+	Vector findVectorGivenX(Vector&, Vector&, double);
+	Vector findVectorGivenY(Vector&,  Vector&, double);
+
+
 	friend void rasterizeObject(const Object&);
 	friend Rasterizer;
 };
 
+Object::Object(const vector<vector<int> >& iB,
+		   const vector<Vector>& xM0,
+		   const Vector& xcg0,
+		   const Vector& theta0,
+		   const vector<vector<double> >& clr,
+		   double z00):
+			indexBuffer(iB),
+	    		xcg(xcg0),
+	    		theta(theta0),
+	    		z0(z00),
+			color(clr){
 
-void Object::updateCamVertices(const Camera& cam){
+	for (auto const& xi: xM0){
+
+		(this -> x).push_back({xi, xi, xi, xi});
+	}
+	this -> n = xM0.size();
+}	
+	
+
+void Object::updateVertices(const Camera& cam){
 	/* Finds the cam vertices */
-
-	(this -> xC).clear();												// get rid of the previous iteration
-
+	
 	Rotation Mtheta = Rotation(this -> theta, {1, 2, 3});
 	Rotation MthetaCam = Rotation(cam.thetaCam, {3, 2, 1});
-	
-	for (auto const& mVertex: this -> xM){
-		
-		(this -> xC).push_back(MthetaCam * ((Mtheta * mVertex) * z0 +
-				this -> xcg - cam.xCam));
-	}
-}
-
-
-
-void Object::updatePixelVertices(const Camera& cam){
-	/* Finds the vertices in the pixel frame ready to be displayed */
-
-	// should update cam vertices before and update width and height of cam
-	
-	(this -> xP).clear();
-	
 	double tphi = tan(cam.phi);
-	
-	for (auto const& cVertex: this -> xC){
+
+	for (int i = 0; i < this -> n; i++){
 		
-		(this -> xP).push_back(Vector(cam.W / 2.0 * cVertex.y / (cVertex.z * tphi),
-					      cam.W / 2.0 *cVertex.x / (cVertex.z * tphi),
-					      cVertex.z));
+		/* world coordinates  */
+		x[i][1] = (Mtheta * x[i][0]) * z0 + this -> xcg;
+		
+		/* camera coordinates  */
+		x[i][2] = MthetaCam * (x[i][1] - cam.xCam);
+
+
+		/* Pixel coordinates  */
+		x[i][3] = Vector(cam.W / 2.0 * x[i][2].y / (x[i][2].z * tphi),
+				 cam.W / 2.0 * x[i][2].x / (x[i][2].z * tphi),
+				 x[i][2].z);
+
 	}
 }
 
+const vector<vector<int> >& Object::getIndexBuffer(void) const{  return (this -> indexBuffer); }
 
-void Object::updateNormalizedVertices(const Camera& cam){
-	/* Finds the vertices in the normalized frame ready to be displayed */
 
-	// should update cam vertices before and update width and height of cam
+Vector Object::findVectorGivenX(Vector& vec1, Vector& vec2, double x){
+	/* this method is used in the rasterizer  */
 	
-	(this -> xN).clear();
+	double alpha = (x - vec2.x) / (vec1.x - vec2.x);
 	
-	double tphi = tan(cam.phi);
-	
-	for (auto const& cVertex: this -> xC){
-		
-		(this -> xN).push_back(Vector(cVertex.y / (cVertex.z * tphi),
-									  cam.W / cam.H * cVertex.x / (cVertex.z * tphi),
-									  cVertex.z));
-	}
+	return Vector(x,
+		      vec1.y * alpha + (1 - alpha) * vec2.y,
+		      vec1.z * alpha + (1 - alpha) * vec2.z);
 }
 
 
-const vector<Vector>& Object::getNormalizedVertices(void) const { return (this -> xN); }
+Vector Object::findVectorGivenY(Vector& vec1, Vector& vec2, double y){
 
-const vector<vector<int> >& Object::getIndexBuffer(void) const { return (this -> indexBuffer); }
+	double alpha = (y - vec2.y) / (vec1.y - vec2.y);
+
+	return Vector(vec1.x * alpha + (1 - alpha) * vec2.x,
+		      y,
+		      vec1.z * alpha + (1 - alpha) * vec2.z);
+}
+
+
+
+
+

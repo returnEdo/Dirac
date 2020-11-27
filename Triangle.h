@@ -14,17 +14,16 @@ class Triangle: public Object{
 	
 	protected:
 	
-	vector<Vector> xM;		
-	vector<Vector> xN;		
-	vector<Vector> xP;		
-	vector<Vector> xC;		
+	vector<vector<Vector> > x;
 	
+	vector<vector<double> > color;
+
+	vector<vector<int> > indexBuffer;	
 	Vector xcg;				
 	Vector theta;			
 	
 	double z0;
-	
-	vector<vector<int> > indexBuffer;	
+	int n;
 	
 	
 	public:
@@ -37,6 +36,6 @@ class Triangle: public Object{
 
 
 Triangle::Triangle(const Vector& xgc0, const Vector& theta0):
-	      Object::Object(BUFFER, Model, xgc0, theta0, 1.0)
+	      Object::Object(BUFFER, Model, xgc0, theta0)
 {}
 	

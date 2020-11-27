@@ -20,10 +20,9 @@ class Cube: public Object{
 	
 	protected:
 	
-	vector<Vector> xM;		
-	vector<Vector> xN;		
-	vector<Vector> xP;		
-	vector<Vector> xC;		
+	vector<vector<Vector> >  x;
+
+	vector<vector<double> > color;
 	
 	Vector xcg;				
 	Vector theta;			
@@ -43,6 +42,6 @@ class Cube: public Object{
 
 
 Cube::Cube(const Vector& xgc0, const Vector& theta0):
-		Object::Object(BUFFER, Model, xgc0, theta0, 1.0)
+		Object::Object(BUFFER, Model, xgc0, theta0)
 {}
 	

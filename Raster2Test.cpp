@@ -1,14 +1,14 @@
 #include <GL/glut.h>
-#include "Cube2.h"
+#include "Cube.h"
 #include "Camera.h"
 #include <vector>
 #include "Vector.h"
-#include "Rasterizer2.h"
+#include "Rasterizer.h"
 
 using namespace std;
 	
 Vector theta0 = Vector();
-Vector x0 = Vector(.0, .0, -10.0);
+Vector x0 = Vector(.0, .0, -4.0);
 Vector xg0 = Vector(.0, .0, 0.0);
 
 

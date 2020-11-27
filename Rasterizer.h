@@ -43,9 +43,10 @@ class Rasterizer{
 	private:
 	
 	vector<shared_ptr<Object> > objectPtrs;			// objects to be rendered
+	shared_ptr<Object> cObj;				// ptr to the current obj
 	array<double, static_cast<int>(LENGTH)> depthBuffer;
 
-	void sort(vector<Vector>& vectors);
+	vector<int> sort(const vector<int>& indexes);
 	void computePoints(rastStruct& rast,  vector<vector<int> >& buffer);
 	void computePointsForTriangles(rastStruct& rast, vector<vector<int> >& buffer, int xpos);
 
@@ -58,9 +59,11 @@ class Rasterizer{
 	void putPixel(int x, int y, const vector<double>& col);
 	void rasterizeLine(const Vector& xx0, const Vector& xx1, vector<vector<int> >& buffer);
 
-	void flatBottom(Vector& vtop, Vector& vright, Vector& vleft, const vector<double>& color);
-	void flatTop(Vector& vbottom, Vector& vright, Vector& vleft, const vector<double>& color);
-	void rasterizeTriangle(vector<Vector>& vectors, const vector<double>& color);	
+	void flatBottom(Vector vtop, Vector vright, Vector vleft,
+		        Vector vtopc, Vector vrightc, Vector vleftc,	const vector<double>& color);
+	void flatTop(Vector vbottom, Vector vright, Vector vleft,
+		     Vector vbottomc, Vector vrightc, Vector vleftc,	const vector<double>& color);
+	void rasterizeTriangle(const vector<int>& indexes, const vector<double>& color);	
 
 	void render(void);
 	void addObject(Object& obj);
@@ -86,26 +89,32 @@ void Rasterizer::putPixel(int x, int y, const vector<double>& col){
 
 
 
-void Rasterizer::sort(vector<Vector>& vectors){
+vector<int> Rasterizer::sort(const vector<int>& indexes){
 	/* Increasing y bubble sort of the vertices */
 	bool change = true;
+
+	vector<int> sorted = indexes;
 	
 	while(change){
 		
 		change = false;
 		
-		for (int i = 0; i < vectors.size() - 1; i++){
+		for (int i = 0; i < indexes.size() - 1; i++){
 			
-			if (vectors[i].y > vectors[i + 1].y){
+			/* x[3] are the pixel coordinates  */	
+			if (cObj -> x[sorted[i]][3].y > cObj -> x[sorted[i + 1]][3].y){
 				
-				Vector temp = vectors[i];
-				vectors[i] = vectors[i + 1];
-				vectors[i + 1] = temp;
-				
+				int temp = sorted[i];
+
+				sorted[i] = sorted[i + 1];
+			       	sorted[i + 1] = temp;
+
 				change = true;
 			}
 		}
 	}
+
+	return sorted;
 }
 
 
@@ -271,22 +280,29 @@ void Rasterizer::rasterizeLine(const Vector& xx0, const Vector& xx1, vector<vect
 
 
 
-void Rasterizer::flatBottom(Vector& vtop, Vector& vright, Vector& vleft, const vector<double>& col){
+void Rasterizer::flatBottom(Vector vtop, Vector vright, Vector vleft,
+	       		    Vector vtopc, Vector vrightc, Vector vleftc, const vector<double>& col){
 	/* Rasterizes flat bottom triangles  */
-	
+	cout << "bottom" << endl;
 
 	// swapper
 	if (vright.x < vleft.x){
 
-		Vector vtemp = vright;	
+		Vector vtemp = vright;
+		Vector temp = vrightc;
+
 		vright = vleft;
-		vleft = vtemp;	
+		vrightc = vleftc;
+
+		vleft = vtemp;
+		vleft = temp;	
 	}
 
 	vector<vector<int> > bufferRight;	// these two contains pixel coordinates 
 	vector<vector<int> > bufferLeft;	
 
 	rasterizeLine(vtop, vright, bufferRight);
+	cout << vtop << "\t" << vright << endl;
 	rasterizeLine(vtop, vleft, bufferLeft);
 
 	int n = bufferRight.size();
@@ -311,17 +327,22 @@ void Rasterizer::flatBottom(Vector& vtop, Vector& vright, Vector& vleft, const v
 
 
 
-void Rasterizer::flatTop(Vector& vbottom, Vector& vright, Vector& vleft, const vector<double>& col){
+void Rasterizer::flatTop(Vector vbottom, Vector vright, Vector vleft,
+	       		 Vector vbottomc, Vector vrightc, Vector vleftc, const vector<double>& col){
 	/* Rasterizes flat top triangles  */
-	
+	cout << "top" << endl;	
 
 	// swapper
 	if (vright.x < vleft.x){
 
-
 		Vector vtemp = vright;	
+		Vector temp = vrightc;
+		
 		vright = vleft;
-		vleft = vtemp;	
+		vrightc = vleftc;
+		
+		vleft = vtemp;
+		vleftc = temp;
 	}
 
 	vector<vector<int> > bufferRight;	// these two contains pixel coordinates 
@@ -334,8 +355,6 @@ void Rasterizer::flatTop(Vector& vbottom, Vector& vright, Vector& vleft, const v
 	int n = bufferRight.size();
 	int x, y;
 	
-	cout << bufferRight.size() << "\t" << bufferLeft.size() << endl;
-
 	// this is the scanning line algorithm
 	if (bufferLeft.size() == n){							// Need to understand why sometimes they have different lenghts
 		for (int i = 0; i < n; i++){
@@ -354,32 +373,55 @@ void Rasterizer::flatTop(Vector& vbottom, Vector& vright, Vector& vleft, const v
 
 
 
-void Rasterizer::rasterizeTriangle(vector<Vector>& vecs, const vector<double>& col){
+void Rasterizer::rasterizeTriangle(const vector<int>& indexes, const vector<double>& col){
 	/* Draws the triangle on screen  */	
 
-	this -> sort(vecs);			// orders the triangles in incresing y order
-	
+	vector<int> sIndex = this -> sort(indexes);			// orders the triangles in incresing y order
+	if (cObj -> x[sIndex[0]][3].y == cObj -> x[sIndex[1]][3].y){		// pixel coordinate
 
-	if (vecs[0].y == vecs[1].y){
-		/* We have a flat bottom triangle   */
-
-		this -> flatBottom(vecs[2], vecs[0], vecs[1], col);
+		flatBottom(cObj -> x[sIndex[2]][3],		// pixel coordinates
+			   cObj -> x[sIndex[0]][3],
+			   cObj -> x[sIndex[1]][3],
+			   cObj -> x[sIndex[2]][2],		// cam coordinates
+			   cObj -> x[sIndex[0]][2],
+			   cObj -> x[sIndex[1]][2],
+			   col);
 	}
-	else if (vecs[1].y == vecs[2].y){
-		/* We have a flat top triangle  */
+	else if (cObj -> x[sIndex[1]][3].y == cObj -> x[sIndex[2]][3].y){	// pixel coordinate
 
-		this -> flatTop(vecs[0], vecs[1], vecs[2], col);
+		flatTop(cObj -> x[sIndex[0]][3],		// pixel coordinates
+			cObj -> x[sIndex[1]][3],
+			cObj -> x[sIndex[2]][3],
+			cObj -> x[sIndex[0]][2],		// cam coordinates
+			cObj -> x[sIndex[1]][2],
+			cObj -> x[sIndex[2]][2],
+			col);
 	}
-	else{
-		/* Comomn triangle  */
-	
-		Vector v4 = Vector(vecs[0].x + (vecs[1].y - vecs[0].y) * (vecs[2].x - vecs[0].x) / (vecs[2].y - vecs[0].y),
-							 vecs[1].y,
-							 vecs[0].z + (vecs[1].y - vecs[0].y) * (vecs[1].z - vecs[0].z) / (vecs[2].y - vecs[0].y));
-		
+	else{	
 
-		this -> flatBottom(vecs[2], vecs[1], v4, col);			// v2 and v1 are the "highest" vertices
-		this -> flatTop(vecs[0], vecs[1], v4, col);				// v0 and v1 are the "lowest" vertices
+		/* Artifial vertex pixel and cam position  */
+		Vector pixelv4 = cObj -> findVectorGivenY(cObj -> x[sIndex[0]][3],
+							  cObj -> x[sIndex[2]][3],
+							  cObj -> x[sIndex[1]][3].y);
+
+		Vector camv4 = cObj -> findVectorGivenX(cObj -> x[sIndex[0]][2],
+							cObj -> x[sIndex[2]][2],
+							cObj -> x[sIndex[1]][2].x);
+
+
+		flatBottom(cObj -> x[sIndex[2]][3],		// pixel coordinates
+			   cObj -> x[sIndex[1]][3],
+			   pixelv4,
+			   cObj -> x[sIndex[2]][2],		// cam coordinates
+			   cObj -> x[sIndex[1]][2],
+			   camv4, col);
+	
+		flatTop(cObj -> x[sIndex[0]][3],		// pixel coordinates
+			cObj -> x[sIndex[1]][3],
+			pixelv4,
+			cObj -> x[sIndex[0]][2],		// cam coordinates
+			cObj -> x[sIndex[1]][2],
+			camv4, col);
 	}
 }
 
@@ -393,22 +435,18 @@ void Rasterizer::render(void){
 	for (auto & obj: this -> objectPtrs){
 
 		for (auto &index: obj -> indexBuffer){
-
-			vector<Vector> temp = { obj -> xP[index[0]],
-						obj -> xP[index[1]],
-						obj -> xP[index[2]]};
+			
+			cObj = obj;							// pointer to the current obj
 			
 			double roof = static_cast<double> (RAND_MAX);
 			vector<double> color = {static_cast<double>(rand() / roof),
 						static_cast<double>(rand() / roof), 
 						static_cast<double>(rand() / roof)};
 
-			cout << temp[0] << "\t" << color[0] << endl;
-			this -> rasterizeTriangle(temp, color);
+			this -> rasterizeTriangle(index, color);
 		}
 	}
 
 }
-
 
 
