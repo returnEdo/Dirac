@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <vector>
 #include <array>
+#include <limits>
 #include <iostream>
 #include <memory>
 #include "Vector.h"
@@ -16,6 +17,10 @@
 
 #ifndef DEFAULT_HEIGHT
 #define DEFAULT_HEIGHT 800
+#endif
+
+#ifndef DEFAULT_COLOR
+#define DEFAULT_COLOR {.0, .0, .0}
 #endif
 
 
@@ -44,7 +49,9 @@ class Rasterizer{
 	
 	vector<shared_ptr<Object> > objectPtrs;			// objects to be rendered
 	shared_ptr<Object> cObj;				// ptr to the current obj
-	array<double, static_cast<int>(LENGTH)> depthBuffer;
+	array<array<double, static_cast<int>(DEFAULT_WIDTH)>, static_cast<int>(DEFAULT_HEIGHT)>  depthBuffer;
+	array<array<array<double, 3>,  static_cast<int>(DEFAULT_WIDTH)>, static_cast<int>(DEFAULT_HEIGHT)>  frameBuffer;
+
 
 	vector<int> sort(const vector<int>& indexes);
 	void computePoints(rastStruct& rast,  vector<vector<int> >& buffer);
@@ -52,22 +59,35 @@ class Rasterizer{
 
 	public:
 
-	Rasterizer(Object& obj)	{ objectPtrs.emplace_back(&obj); }
-	Rasterizer(void)	{}
-
-
-	void putPixel(int x, int y, const vector<double>& col);
+	Rasterizer(Object& obj);
+		
 	void rasterizeLine(const Vector& xx0, const Vector& xx1, vector<vector<int> >& buffer);
 
 	void flatBottom(Vector vtop, Vector vright, Vector vleft,
-		        Vector vtopc, Vector vrightc, Vector vleftc,	const vector<double>& color);
+		        Vector vtopc, Vector vrightc, Vector vleftc,	const array<double, 3>& color);
 	void flatTop(Vector vbottom, Vector vright, Vector vleft,
-		     Vector vbottomc, Vector vrightc, Vector vleftc,	const vector<double>& color);
-	void rasterizeTriangle(const vector<int>& indexes, const vector<double>& color);	
-
+		     Vector vbottomc, Vector vrightc, Vector vleftc,	const array<double, 3>& color);
+	void rasterizeTriangle(const vector<int>& indexes, const array<double, 3>& color);	
+	
+	void paintCanvas(void);
 	void render(void);
 	void addObject(Object& obj);
 };
+
+
+Rasterizer::Rasterizer(Object& obj){
+
+	objectPtrs.emplace_back(&obj);
+
+	for (int x = 0; x < DEFAULT_WIDTH; x++){
+		for (int y = 0; y < DEFAULT_HEIGHT; y++){
+
+			(this -> frameBuffer)[y][x] = DEFAULT_COLOR;
+			(this -> depthBuffer)[y][x] = numeric_limits<double>::infinity();
+		}
+	}
+}
+
 
 
 
@@ -75,16 +95,6 @@ void Rasterizer::addObject(Object& obj){
 	/* Simply add an object to the render list  */
 
 	(this -> objectPtrs).emplace_back(&obj);
-}
-
-
-
-void Rasterizer::putPixel(int x, int y, const vector<double>& col){
-	/* Puts a pixel in x y  */
-	
-	/* TODO: add shaders  */
-	glColor3d(col[0], col[1], col[2]);
-	glVertex2i(x, y);
 }
 
 
@@ -281,12 +291,13 @@ void Rasterizer::rasterizeLine(const Vector& xx0, const Vector& xx1, vector<vect
 
 
 void Rasterizer::flatBottom(Vector vtop, Vector vright, Vector vleft,
-	       		    Vector vtopc, Vector vrightc, Vector vleftc, const vector<double>& col){
+	       		    Vector vtopc, Vector vrightc, Vector vleftc, const array<double, 3>& col){
 	/* Rasterizes flat bottom triangles  */
-	cout << "bottom" << endl;
 
 	// swapper
 	if (vright.x < vleft.x){
+
+		cout << "swapped" << endl;
 
 		Vector vtemp = vright;
 		Vector temp = vrightc;
@@ -295,32 +306,54 @@ void Rasterizer::flatBottom(Vector vtop, Vector vright, Vector vleft,
 		vrightc = vleftc;
 
 		vleft = vtemp;
-		vleft = temp;	
+		vleftc = temp;	
 	}
+	cout << "Bottom coord"<< vtop << vleft << vright << endl;
 
 	vector<vector<int> > bufferRight;	// these two contains pixel coordinates 
 	vector<vector<int> > bufferLeft;	
 
 	rasterizeLine(vtop, vright, bufferRight);
-	cout << vtop << "\t" << vright << endl;
 	rasterizeLine(vtop, vleft, bufferLeft);
 
 	int n = bufferRight.size();
 	int x, y;
 	// this is the scanning line algorithm
+
+	double z = vtopc.z;
+	double zX = z;
 	
 	if (bufferLeft.size() == n){
+
+
+		double deltaZ  = (vtopc.z - vleftc.z) / static_cast<double>(n);
+		double deltaZx = (vleftc.z - vrightc.z) / static_cast<double>(floor(vleft.x) - floor(vright.x));
+
+
 		for (int i = 0; i < n; i++){
-			
+
 			y = bufferRight[i][1];
 
 			for (x = bufferLeft[i][0]; x <= bufferRight[i][0]; x++){
+				
+				int xIndx = static_cast<double>(DEFAULT_WIDTH / 2) - 1 + x;
+				int yIndx = static_cast<double>(DEFAULT_HEIGHT / 2) - 1 - y;
 
-				/* TODO: z depth test  */
+				if (zX < this -> depthBuffer[yIndx][xIndx]){
+					/* if the depth test is passed */
 
-				putPixel(x, y, col);
-		
+					frameBuffer[yIndx][xIndx] = col;
+					depthBuffer[yIndx][xIndx] = zX;
+				}
+
+				zX += deltaZx;
+
 			}
+
+			
+			z += deltaZ;
+			zX = z;
+
 		}
 	}
 }
@@ -328,9 +361,8 @@ void Rasterizer::flatBottom(Vector vtop, Vector vright, Vector vleft,
 
 
 void Rasterizer::flatTop(Vector vbottom, Vector vright, Vector vleft,
-	       		 Vector vbottomc, Vector vrightc, Vector vleftc, const vector<double>& col){
+	       		 Vector vbottomc, Vector vrightc, Vector vleftc, const array<double, 3>& col){
 	/* Rasterizes flat top triangles  */
-	cout << "top" << endl;	
 
 	// swapper
 	if (vright.x < vleft.x){
@@ -355,29 +387,54 @@ void Rasterizer::flatTop(Vector vbottom, Vector vright, Vector vleft,
 	int n = bufferRight.size();
 	int x, y;
 	
+	double z = vbottom.z;
+	double zX = z;
+
 	// this is the scanning line algorithm
 	if (bufferLeft.size() == n){							// Need to understand why sometimes they have different lenghts
+	
+		double deltaZy = (vleftc.z - vbottomc.z) / static_cast<double>(n);					// per pixel z increment y
+		double deltaZx = (vrightc.z - vleftc.z) / static_cast<double>(floor(vleft.x) - floor(vright.x));	// per pixel z increment x
+	
+	
 		for (int i = 0; i < n; i++){
 			
 			y = bufferRight[i][1];
 
 			for (x = bufferLeft[i][0]; x <= bufferRight[i][0]; x++){
 
-				/* TODO: z depth test  */
+				int xIndx = static_cast<double>(DEFAULT_WIDTH / 2) - 1 + x;
+				int yIndx = static_cast<double>(DEFAULT_HEIGHT / 2) - 1 - y;
 
-				putPixel(x, y, col);
+				if (zX < this -> depthBuffer[yIndx][xIndx]){
+					/* if the depth test is passed */
+
+					frameBuffer[yIndx][xIndx] = col;
+					depthBuffer[yIndx][xIndx] = zX;
+				}
+
+				zX += deltaZx;						// increment of z in the x direction
+		
 			}
+
+			z += deltaZy;							// increment of z in the y direction
+			zX = z;
+
 		}
 	}
 }
 
 
 
-void Rasterizer::rasterizeTriangle(const vector<int>& indexes, const vector<double>& col){
+void Rasterizer::rasterizeTriangle(const vector<int>& indexes, const array<double, 3>& col){
 	/* Draws the triangle on screen  */	
 
 	vector<int> sIndex = this -> sort(indexes);			// orders the triangles in incresing y order
+
+//	cout <<  cObj -> x[sIndex[0]][3] <<  cObj -> x[sIndex[1]][3] << endl;
 	if (cObj -> x[sIndex[0]][3].y == cObj -> x[sIndex[1]][3].y){		// pixel coordinate
+		cout << "\n" << endl;	
+		cout << "Fed coord" << cObj -> x[sIndex[2]][3] << cObj -> x[sIndex[0]][3] << cObj -> x[sIndex[1]][3] << endl;
 
 		flatBottom(cObj -> x[sIndex[2]][3],		// pixel coordinates
 			   cObj -> x[sIndex[0]][3],
@@ -426,6 +483,28 @@ void Rasterizer::rasterizeTriangle(const vector<int>& indexes, const vector<doub
 }
 
 
+void Rasterizer::paintCanvas(void){
+	/* Renders all to screen  */
+
+	for (int x = 0; x < DEFAULT_WIDTH; x++){
+
+		for (int y = 0; y < DEFAULT_HEIGHT; y++){
+
+			if (depthBuffer[y][x] != numeric_limits<double>::infinity()){
+
+				glColor3d(frameBuffer[y][x][0], frameBuffer[y][x][1], frameBuffer[y][x][2]);
+				glVertex2i(x - DEFAULT_WIDTH / 2 + 1, DEFAULT_HEIGHT / 2 - 1 -y);
+				
+				(this -> frameBuffer[y][x]) = DEFAULT_COLOR;
+				(this -> depthBuffer[y][x]) = numeric_limits<double>::infinity();
+			}
+
+		}
+	}
+}
+
+
+
 
 void Rasterizer::render(void){
 	/* Renders all the objects on the render list  */
@@ -439,14 +518,17 @@ void Rasterizer::render(void){
 			cObj = obj;							// pointer to the current obj
 			
 			double roof = static_cast<double> (RAND_MAX);
-			vector<double> color = {static_cast<double>(rand() / roof),
+			array<double, 3> color = {static_cast<double>(rand() / roof),
 						static_cast<double>(rand() / roof), 
 						static_cast<double>(rand() / roof)};
 
+			
 			this -> rasterizeTriangle(index, color);
+			
+	
 		}
 	}
-
+	this -> paintCanvas();
 }
 
 

@@ -1,5 +1,5 @@
 #include <GL/glut.h>
-#include "Cube.h"
+#include "Triangle.h"
 #include "Camera.h"
 #include <vector>
 #include "Vector.h"
@@ -13,7 +13,8 @@ Vector xg0 = Vector(.0, .0, 0.0);
 
 
 Camera cam = Camera(x0, theta0);
-Cube cb = Cube(xg0);
+Triangle cb = Triangle(xg0);
+Triangle f = Triangle(Vector(.0, .0, .1));
 	
 Rasterizer rast = Rasterizer(cb);
 
@@ -25,11 +26,8 @@ void display(void){
 	glBegin(GL_POINTS);
 
 	cb.updateVertices(cam);
-
+	f.updateVertices(cam);
 	rast.render();
-	
-	for (int i = 0; i < 100; i++){ glVertex2i(i, i); }
-
 
 	glEnd();
 	glFlush();
@@ -38,14 +36,15 @@ void display(void){
 void special(int key, int x, int y){
 	
 	cb.updateAttitude(.3);
-	glutPostRedisplay();	// or even display
+	display();
 }
 
 
 
 
 int main(int argc, char* argv[]){
-	
+
+	rast.addObject(f);
 	
 	glutInit(&argc,argv);
 	
