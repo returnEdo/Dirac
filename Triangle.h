@@ -6,7 +6,9 @@
 
 vector<vector<int> > BUFFER = {{0, 1, 2}};
 
-vector<Vector> Model = {Vector(.0, 1, .0), Vector(1, .0, .0), Vector(.0, -1.0, .0)};
+vector<Vector> Model = {Vector(-1.0, -1.0, -1.0),
+			Vector(-1.0, 1.0, -1.0),
+			Vector(1.0, 1.0, -1.0)};
 
 
 

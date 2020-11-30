@@ -28,9 +28,6 @@ void display(void){
 
 	rast.render();
 	
-	for (int i = 0; i < 100; i++){ glVertex2i(i, i); }
-
-
 	glEnd();
 	glFlush();
 }

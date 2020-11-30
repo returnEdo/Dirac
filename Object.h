@@ -97,7 +97,6 @@ void Object::updateVertices(const Camera& cam){
 		x[i][3] = Vector(cam.W / 2.0 * x[i][2].y / (x[i][2].z * tphi),
 				 cam.W / 2.0 * x[i][2].x / (x[i][2].z * tphi),
 				 x[i][2].z);
-
 	}
 }
 

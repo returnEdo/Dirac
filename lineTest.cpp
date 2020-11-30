@@ -1,4 +1,3 @@
-#include <iostream>
 #include <GL/glut.h>
 #include "Triangle.h"
 #include "Camera.h"
@@ -15,9 +14,13 @@ Vector xg0 = Vector(.0, .0, 0.0);
 
 Camera cam = Camera(x0, theta0);
 Triangle cb = Triangle(xg0);
-Triangle f = Triangle(Vector(.0, .0, .1));
 	
 Rasterizer rast = Rasterizer(cb);
+
+
+Vector x1 = Vector(20, 20, .0);
+Vector x2 = Vector(-100, 180, .0);
+Vector x3 = Vector(-100, 0, 0);
 
 
 void display(void){
@@ -25,17 +28,33 @@ void display(void){
 	
 	glClear(GL_COLOR_BUFFER_BIT);	
 	glBegin(GL_POINTS);
+	
 
-	cb.updateVertices(cam);
-	f.updateVertices(cam);
-	rast.render();
+	vector<vector<int> > buffer;
+	vector<vector<int> > buffer2;
+	
+	rast.rasterizeLine(x2, x1, buffer);
+	rast.rasterizeLine(x2, x3, buffer2);
+
+	cout << "Buffer start" << buffer[0][0] << ", " << buffer[0][1] << endl;
+	cout << "Buffer start" << buffer2[0][0] << ", " << buffer2[0][1] << endl;
+	for (auto const& vec: buffer2){
+		glColor3d(.0, 1.0, .0);
+		glVertex2i(vec[0], vec[1]);
+	}
+	for (auto const& vec: buffer){
+		glColor3d(.0, 1.0, .0);
+		glVertex2i(vec[0], vec[1]);
+	}
+	
+		
 
 	glEnd();
 	glFlush();
 }
 
 void special(int key, int x, int y){
-
+	
 	cb.updateAttitude(.3);
 	display();
 }
@@ -45,7 +64,6 @@ void special(int key, int x, int y){
 
 int main(int argc, char* argv[]){
 
-	rast.addObject(f);
 	
 	glutInit(&argc,argv);
 	
@@ -54,6 +72,7 @@ int main(int argc, char* argv[]){
 	glutInitWindowSize(1200, 800);
 	
 	glutCreateWindow("");
+	
 	
 	glutDisplayFunc(display);
 	glutSpecialFunc(special);
