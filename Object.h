@@ -12,7 +12,7 @@ class Rasterizer;
 
 class Object{
 	
-	protected:
+	public:
 	
 	vector<vector<Vector> > x;	// M, W, C, P												// model vertices
 	vector<vector<double> > color;		// color of the face
@@ -25,8 +25,6 @@ class Object{
 	int n;
 	double z0;
 	
-	
-	public:
 	
 	Object(const vector<vector<int> >& iB,
 		   const vector<Vector>& xM0,
@@ -96,7 +94,7 @@ void Object::updateVertices(const Camera& cam){
 		/* Pixel coordinates  */
 		x[i][3] = Vector(cam.W / 2.0 * x[i][2].y / (x[i][2].z * tphi),
 				 cam.W / 2.0 * x[i][2].x / (x[i][2].z * tphi),
-				 x[i][2].z);
+				 1 / x[i][2].z);					// returns the inverse
 	}
 }
 

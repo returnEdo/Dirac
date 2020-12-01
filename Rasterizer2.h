@@ -296,6 +296,12 @@ void Rasterizer::flatBottom(Vector vtop, Vector vright, Vector vleft,
 
 	double incrYL = (1 / vleft.z - 1 / vtop.z) / (n - 1);
 	double incrYR = (1 / vright.z - 1 / vtop.z) / (n - 1);
+		
+//	cout << "invZLi" << invZLi << endl;
+//	cout << "invZRi" << invZRi << endl;
+//	cout << "incrYL" << incrYL << endl;
+//	cout << "incrYR" << incrYR << endl;
+
 
 	for (int i = 0; i < n; i++){
 
@@ -313,10 +319,10 @@ void Rasterizer::flatBottom(Vector vtop, Vector vright, Vector vleft,
 			
 			int xIndx = static_cast<double>(DEFAULT_WIDTH / 2) - 1 + x;
 			int yIndx = static_cast<double>(DEFAULT_HEIGHT / 2) - 1 - y;
-				
+
 			if (invZi > depthBuffer[yIndx][xIndx]){
 				frameBuffer[yIndx][xIndx] = col;
-				depthBuffer[yIndx][xIndx] = 1;
+				depthBuffer[yIndx][xIndx] = invZi;
 		
 			}
 		}
@@ -351,7 +357,7 @@ void Rasterizer::flatTop(Vector vbottom, Vector vright, Vector vleft,
 
 	int n = bufferRight.size();
 	int x, y;
-	
+
 	double invZLi = vbottom.z;
 	double invZRi = vbottom.z;
 
@@ -381,7 +387,7 @@ void Rasterizer::flatTop(Vector vbottom, Vector vright, Vector vleft,
 			if (invZi > depthBuffer[yIndx][xIndx]){
 
 				frameBuffer[yIndx][xIndx] = col;
-				depthBuffer[yIndx][xIndx] = 1;
+				depthBuffer[yIndx][xIndx] = invZi;
 			}
 
 		}
@@ -419,38 +425,30 @@ void Rasterizer::rasterizeTriangle(const vector<int>& indexes, const array<doubl
 	else{	
 
 		/* Artificial vertex pixel and cam position  */
-//		Vector pixelv4 = cObj -> findVectorGivenY(cObj -> x[sIndex[0]][3],
-//							  cObj -> x[sIndex[2]][3],
-//							  cObj -> x[sIndex[1]][3].y);
-
-		Vector camv4 = cObj -> findVectorGivenX(cObj -> x[sIndex[0]][2],
-							cObj -> x[sIndex[2]][2],
-							cObj -> x[sIndex[1]][2].x);
-
-//		pixelv4.z = camv4.z;
-		
-		double t = (cObj -> x[sIndex[1]][3].y - cObj -> x[sIndex[2]][3].y) / (cObj -> x[sIndex[0]][3].y - cObj -> x[sIndex[2]][3].y);
-		double zbetainv = (1-t)/(cObj -> x[sIndex[2]][2]).z + t / cObj -> x[sIndex[0]][2].z;
-		double x = (cObj -> x[sIndex[2]][3].x) * (1-t) + (cObj -> x[sIndex[0]][3].x) * t;
-
-		Vector pixelv4 = Vector(x, cObj -> x[sIndex[1]][3].y, 1/zbetainv);
-		
-		
-		pixelv4.z = camv4.z;
-
-		flatBottom(cObj -> x[sIndex[2]][3],		// pixel coordinates
-			   cObj -> x[sIndex[1]][3],
-			   pixelv4,
-			   cObj -> x[sIndex[2]][2],		// cam coordinates
-			   cObj -> x[sIndex[1]][2],
-			   camv4, col);
 	
+		double t = ((cObj -> x[sIndex[1]][3]).y - (cObj -> x[sIndex[0]][3]).y) / ((cObj -> x[sIndex[2]][3]).y - (cObj -> x[sIndex[0]][3]).y);
+	
+		double v4x = (cObj -> x[sIndex[0]][3]).x * (1 - t) + (cObj -> x[sIndex[2]][3]).x * t;
+		double inv4z = 1 / (cObj -> x[sIndex[0]][3]).z * (1 - t) + 1 / (cObj -> x[sIndex[2]][3]).z * t;
+
+		Vector v4 = Vector(v4x, (cObj -> x[sIndex[1]][3]).y, 1 / inv4z);
+
 		flatTop(cObj -> x[sIndex[0]][3],		// pixel coordinates
-			cObj -> x[sIndex[1]][3],
-			pixelv4,
-			cObj -> x[sIndex[0]][2],		// cam coordinates
-			cObj -> x[sIndex[1]][2],
-			camv4, col);
+				cObj -> x[sIndex[1]][3],
+				v4,
+				cObj -> x[sIndex[0]][2],		// cam coordinates
+				cObj -> x[sIndex[1]][2],
+				v4,
+				col);
+		flatBottom(cObj -> x[sIndex[2]][3],		// pixel coordinates
+				cObj -> x[sIndex[1]][3],
+				v4,
+				cObj -> x[sIndex[2]][2],		// cam coordinates
+				cObj -> x[sIndex[1]][2],
+				v4,
+				col);
+
+
 	}
 }
 
