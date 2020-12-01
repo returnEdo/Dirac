@@ -3,7 +3,7 @@
 #include "Camera.h"
 #include <vector>
 #include "Vector.h"
-#include "Rasterizer.h"
+#include "Rasterizer2.h"
 
 using namespace std;
 	

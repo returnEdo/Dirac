@@ -188,32 +188,7 @@ void Rasterizer::rasterizeLine(const Vector& xx0, const Vector& xx1, vector<vect
 	 int y0 = static_cast<int>(xx0.y);
 	 int x1 = static_cast<int>(xx1.x);
 	 int y1 = static_cast<int>(xx1.y);
-	
-//	if (x0 == x1){
-//		// not good 		
-//		if (y1 < y0){
-//			
-//			int temp = y0; 
-//			y0 = y1;
-//			y1 = temp;
-//		}
-//		
-//		for (int i = 0; i <= y1 - y0; i++){	buffer.push_back({x0, y0 + i}); }
-//		return;
-//	}
-//	else if (y0 == y1){
-//			
-//		if (x1 < x0){
-//			
-//			int temp = x0; 
-//			x0 = x1;
-//			x1 = temp;
-//		}
-//		
-//		for (int i = 0; i <= x1 - x0; i++){ buffer.push_back({x0 + i, y0}); }
-//		return;
-//	}	
-	
+
 	int tempx0 = x0;
 	int tempy0 = y0;
 	int tempx1 = x1;
@@ -306,12 +281,6 @@ void Rasterizer::flatBottom(Vector vtop, Vector vright, Vector vleft,
 		vleftc = temp;	
 	}
 
-//	cout << "Flat bottom " << endl;
-//	cout << vtop << endl;
-//	cout << vleft << endl;
-//	cout << vright << endl;
-
-
 	vector<vector<int> > bufferRight;	// these two contains pixel coordinates 
 	vector<vector<int> > bufferLeft;	
 
@@ -320,47 +289,38 @@ void Rasterizer::flatBottom(Vector vtop, Vector vright, Vector vleft,
 
 	int n = bufferRight.size();
 	int x, y;
+	
+	double invZLi = vtop.z;
+	double invZRi = vtop.z;
 
-	if (bufferLeft.size() == n){
 
-		double invZLi = 1 / vtop.z;				// inverse of z left side
-		double invZRi = 1 / vtop.z;
-		double incrYL = (1 / vleft.z - 1 / vtop.z) / n;		// increment x in y direction
-		double incrYR = (1 / vright.z - 1 / vtop.z) / n;	
+	double incrYL = (1 / vleft.z - 1 / vtop.z) / (n - 1);
+	double incrYR = (1 / vright.z - 1 / vtop.z) / (n - 1);
 
-		for (int i = 0; i < n; i++){
+	for (int i = 0; i < n; i++){
 
-			y = bufferRight[i][1];
-			invZLi += incrYL;
-			invZRi += incrYR;
+		invZLi += incrYL;
+		invZRi += incrYR;
+
+		double invZi = invZLi;
+		double incri = (invZRi - invZLi) / (bufferRight[i][0] - bufferLeft[i][0]);
+
+		y = bufferRight[i][1];
+
+		for (x = bufferLeft[i][0]; x <= bufferRight[i][0]; x++){
+
+			invZi += incri;
 			
-			double invZi = invZLi;
-			double incrX = (invZRi - invZLi) / (bufferRight[i][0] - bufferLeft[i][1]);
-
-			for (x = bufferLeft[i][0]; x <= bufferRight[i][0]; x++){
+			int xIndx = static_cast<double>(DEFAULT_WIDTH / 2) - 1 + x;
+			int yIndx = static_cast<double>(DEFAULT_HEIGHT / 2) - 1 - y;
 				
-				/* inverse of the depth inside jthe triangle  */
-				invZi += incrX;
-
-				int xIndx = static_cast<double>(DEFAULT_WIDTH / 2) - 1 + x;
-				int yIndx = static_cast<double>(DEFAULT_HEIGHT / 2) - 1 - y;
-				
-				if (invZi > this -> depthBuffer[yIndx][xIndx]){	// using inverses here
-					/* if the depth test is passed */
-
-					frameBuffer[yIndx][xIndx] = col;
-					depthBuffer[yIndx][xIndx] = invZi;
-				}
-				else{
-					cout << "failed" << endl;
-
-					frameBuffer[yIndx][xIndx] = {1, .0, .0};}
-					depthBuffer[yIndx][xIndx] = 100000;
+			if (invZi > depthBuffer[yIndx][xIndx]){
+				frameBuffer[yIndx][xIndx] = col;
+				depthBuffer[yIndx][xIndx] = 1;
+		
 			}
-
-			
-
 		}
+
 	}
 }
 
@@ -383,11 +343,6 @@ void Rasterizer::flatTop(Vector vbottom, Vector vright, Vector vleft,
 		vleftc = temp;
 	}
 
-//	cout << "Flat top " << endl;
-//	cout << vbottom << endl;
-//	cout << vleft << endl;
-//	cout << vright << endl;
-
 	vector<vector<int> > bufferRight;	// these two contains pixel coordinates 
 	vector<vector<int> > bufferLeft;	
 
@@ -396,48 +351,48 @@ void Rasterizer::flatTop(Vector vbottom, Vector vright, Vector vleft,
 
 	int n = bufferRight.size();
 	int x, y;
-
-	// this is the scanning line algorithm
-	if (bufferLeft.size() == n){		// Need to understand why sometimes they have different lenghts
 	
-		double invZLi = 1 / vbottom.z;
-		double invZRi = 1 / vbottom.z;
-		double incrYL = (1 / vleft.z - 1 / vbottom.z) / n;
-		double incrYR = (1 / vright.z - 1 / vbottom.z) / n;
-	
-		for (int i = 0; i < n; i++){
+	double invZLi = vbottom.z;
+	double invZRi = vbottom.z;
+
+	double incrYL = (1 / vleft.z - 1 / vbottom.z) / (n - 1);
+	double incrYR = (1 / vright.z - 1 / vbottom.z) / (n - 1);
+
+
+	for (int i = 0; i < n; i++){
+		
+		invZLi += incrYL;
+		invZRi += incrYR;
+
+		double invZi = invZLi;
+
+		double incrX = (invZRi - invZLi) / (bufferRight[i][0] - bufferLeft[i][0]);
+
+		
+		y = bufferRight[i][1];
+
+		for (x = bufferLeft[i][0]; x <= bufferRight[i][0]; x++){
 			
-			y = bufferRight[i][1];
-			invZLi += incrYL;
-			invZRi += incrYR;
+			invZi += incrX;
+
+			int xIndx = static_cast<double>(DEFAULT_WIDTH / 2) - 1 + x;
+			int yIndx = static_cast<double>(DEFAULT_HEIGHT / 2) - 1 - y;
 			
-			double invZi = invZLi;
-			double incrX = (invZRi - invZLi) / (bufferRight[i][0] - bufferLeft[i][0]);
+			if (invZi > depthBuffer[yIndx][xIndx]){
 
-			for (x = bufferLeft[i][0]; x <= bufferRight[i][0]; x++){
-				
-				invZi += incrX;
-
-				int xIndx = static_cast<double>(DEFAULT_WIDTH / 2) - 1 + x;
-				int yIndx = static_cast<double>(DEFAULT_HEIGHT / 2) - 1 - y;
-				
-				if (invZi > this -> depthBuffer[yIndx][xIndx]){
-					/* if the depth test is passed */
-
-					frameBuffer[yIndx][xIndx] = col;
-					depthBuffer[yIndx][xIndx] = invZi;
-				}
-
+				frameBuffer[yIndx][xIndx] = col;
+				depthBuffer[yIndx][xIndx] = 1;
 			}
 
 		}
+
 	}
 }
 
 
 
 void Rasterizer::rasterizeTriangle(const vector<int>& indexes, const array<double, 3>& col){
-	/* Draws the triangle on screen  */	
+/* Draws the triangle on screen  */	
 
 	vector<int> sIndex = this -> sort(indexes);			// orders the triangles in incresing y order
 

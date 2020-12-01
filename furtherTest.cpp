@@ -4,7 +4,7 @@
 #include "Camera.h"
 #include <vector>
 #include "Vector.h"
-#include "Rasterizer.h"
+#include "Rasterizer2.h"
 
 using namespace std;
 	
@@ -15,7 +15,7 @@ Vector xg0 = Vector(.0, .0, 0.0);
 
 Camera cam = Camera(x0, theta0);
 Triangle cb = Triangle(xg0);
-Triangle f = Triangle(Vector(.0, .0, .1));
+Triangle f = Triangle(Vector(.0, .0, .0));
 	
 Rasterizer rast = Rasterizer(cb);
 
