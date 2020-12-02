@@ -3,6 +3,7 @@
 #include <iostream>
 #include <assert.h>
 #include <cmath>
+#include <vector>
 
 class Vector{
 	
@@ -16,7 +17,8 @@ class Vector{
 		x(xx),	y(yy),	z(zz)		{}
 	
 	Vector(const Vector& other):	x(other.x), y(other.y), z(other.z)	{}		
-	
+	Vector(const std::vector<double>& other): x(other[0]), y(other[1]), z(other[2])	{}
+
 	Vector(void):	x(.0),	y(.0),	z(.0)	{}
 	
 	// Let us write a couple of operations

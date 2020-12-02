@@ -3,6 +3,7 @@
 #include "Cube.h"
 #include "Camera.h"
 #include <vector>
+#include <string>
 #include "WorldSpace.h"
 #include "Controller.h"
 
@@ -19,9 +20,9 @@ using namespace std;
 	
 Vector xg0 = Vector(.0, .0, 0.0);
 Vector theta0 = Vector(.2, .2, .2);
-
+string address = "monkey.obj";
 	
-Cube cb = Cube(xg0, theta0);
+Object cb = Object(address, xg0, theta0);
 Cube cb2 = Cube(Vector(1, 1,2),  theta0);
 
 WorldSpace wspace = WorldSpace();

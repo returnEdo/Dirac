@@ -4,10 +4,15 @@
 #include <cmath>
 #include "Vector.h"
 #include "Object.h"
+#include "Rotation.h"
 
+#ifndef DEFAULT_WIDTH
+#define DEFAULT_WIDTH 1920
+#endif
 
-#define DEFAULT_WIDTH 1200.0
-#define DEFAULT_HEIGHT 800.0
+#ifndef DEFAULT_HEIGHT
+#define DEFAULT_HEIGHT 1080
+#endif
 
 
 class Camera{
@@ -29,9 +34,10 @@ class Camera{
 		W(DEFAULT_WIDTH),
 		H(DEFAULT_HEIGHT)						{}
 	
-	friend class Object;
-	
+	friend class Object;	
 	void changeFOV(double deltaTheta);
+	void updatePosition(const Vector&);
+	void updateAttitude(const Vector&);
 };
 
 
@@ -40,4 +46,14 @@ void Camera::changeFOV(double deltaPhi){
 	this -> phi += deltaPhi;
 }
 
+void Camera::updatePosition(const Vector& deltaVec){
+	
+	Rotation rot = Rotation(this -> thetaCam * (-1.0));
 
+	this -> xCam += (rot * deltaVec);
+}
+
+void Camera::updateAttitude(const Vector& deltaTheta){
+
+	this -> thetaCam += deltaTheta;
+}

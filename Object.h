@@ -3,9 +3,11 @@
 #include <iostream>
 #include <cmath>
 #include <vector>
+#include <string>
 #include "Vector.h"
 #include "Rotation.h"
 #include "Camera.h"
+#include "OBJParser.h"
 
 class Rasterizer;
 
@@ -41,7 +43,13 @@ class Object{
 		z0(obj.z0),
 		color(obj.color),
 		n(obj.n)	{}
-		
+	
+	Object(const string address,
+	       const Vector& xg0 = Vector(),
+	       const Vector& theta0 = Vector(),
+	       const vector<vector<double> >& clr = {{}},
+	       double z00 = 1.0);
+
 	void updateVertices(const Camera& cam);
 	
 	const vector<vector<int> >& getIndexBuffer(void) const;
@@ -74,6 +82,29 @@ Object::Object(const vector<vector<int> >& iB,
 	this -> n = xM0.size();
 }	
 	
+	
+Object::Object(const string address,
+	       const Vector& xg0,
+	       const Vector& theta0,
+	       const vector<vector<double> >& clr,
+	       double z00):
+	    		theta(theta0),
+	    		z0(z00),
+			color(clr)	{
+	
+	vector<Vector> xM;
+	getObject(address, xM, this -> indexBuffer);
+
+	for (auto const& xi: xM){
+
+		(this -> x).push_back({xi, xi, xi, xi});
+	}
+
+	this -> n = xM.size();
+}
+
+
+
 
 void Object::updateVertices(const Camera& cam){
 	/* Finds the cam vertices */
