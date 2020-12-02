@@ -29,8 +29,7 @@ class Vector{
 	friend Vector operator /(const Vector& a, double c);
 	
 	friend Vector operator ^(const Vector& a, const Vector& b);			// vector product
-	friend bool operator ==(const Vector& a, const Vector& b);
-	
+	friend bool operator ==(const Vector& a, const Vector& b);	
 	
 	double& operator [](const int indx);								// indexing
 	
@@ -50,6 +49,8 @@ class Vector{
 	friend Vector normalize(Vector& a);
 
 	friend double distance(Vector& a, Vector& b);
+
+	friend bool nonNegative(const Vector& a);
 };
 
 
@@ -181,6 +182,11 @@ double distance(Vector& a, Vector& b){
 	Vector c = a - b;
 	
 	return norm(c);
+}
+
+bool nonNegative(const Vector& a){
+
+	return (a.x >= 0.0 and  a.y >= 0.0 and a.z >= 0.0);
 }
 
 

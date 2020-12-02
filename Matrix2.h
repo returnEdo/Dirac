@@ -82,7 +82,6 @@ Matrix2 operator *(const Matrix2& a, const Matrix2& b){
 	Vector2 res1 = Vector2(a.row1 * b.col1, a.row1 * b.col2);
 	Vector2 res2 = Vector2(a.row2 * b.col1, a.row2 * b.col2);
 	
-	cout << a.row2 * b.col1 << endl;
 	return Matrix2(res1, res2);
 }
 
@@ -156,7 +155,6 @@ Matrix2 transpose(const Matrix2& a){
 Matrix2 inv(const Matrix2& a){
 	
 	double dt = det(a);
-	cout << dt << endl;	
 	assert(dt != .0);
 	
 	Vector2 r1 = Vector2(a.row2.y, - a.row1.y);

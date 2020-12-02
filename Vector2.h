@@ -78,6 +78,7 @@ Vector2 operator -(const Vector2& a, const Vector2& b){
 
 double operator *(const Vector2& a, const Vector2& b){
 	/* Scalar product */
+	
 	return a.x * b.x + a.y * b.y;
 }
 	

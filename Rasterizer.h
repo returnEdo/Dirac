@@ -99,65 +99,118 @@ BBoxRasterizer Rasterizer::findBoundingBox(const Vector& v1, const Vector& v2, c
 
 
 
+//
+//void Rasterizer::renderTriangle(const vector<int>& indexes){
+//	/* Adds the triangle to the buffers */	
+//	
+//	double roof = static_cast<double> (RAND_MAX);
+//	array<double, 3> currentColor = {static_cast<double>(rand() / roof),
+//				        	static_cast<double>(rand() / roof), 
+//				        	static_cast<double>(rand() / roof)};
+//
+//
+//	// Barycentric rasterizer
+//	Vector2 q1 = Vector2(cObj -> x[indexes[1]][3] - cObj -> x[indexes[0]][3]);
+//	Vector2 q2 = Vector2(cObj -> x[indexes[2]][3] - cObj -> x[indexes[0]][3]);
+//
+//	double scl = q1 * q2;
+//	Matrix2 mat1 =  Matrix2(Vector2(norm2(q1), scl), Vector2(scl, norm2(q2)));
+//
+//	Matrix2 mat = inv(Matrix2(Vector2(norm2(q1), scl),
+//				  Vector2(scl, norm2(q2))));
+//
+//	BBoxRasterizer bbox = this -> findBoundingBox(cObj -> x[indexes[0]][3],
+//						      cObj -> x[indexes[1]][3],
+//						      cObj -> x[indexes[2]][3]);
+//
+//	for (int x = static_cast<int>(bbox.LL.x); x < static_cast<int>(bbox.TR.x); x++){
+//
+//		for (int y = static_cast<int>(bbox.LL.y); x < static_cast<int>(bbox.TR.y); y++){
+//
+//			Vector2 currentPosition = Vector2(static_cast<double>(x) - cObj -> x[indexes[0]][3].x, static_cast<double>(y) - cObj -> x[indexes[0]][3].y);
+//			cout << currentPosition << endl;	
+//			/* Barycentric coordinates calculation  */
+//			Vector2 coord2 = mat * Vector2(currentPosition * q1, currentPosition * q2);
+//			Vector coord = Vector(1 - coord.x - coord.y, coord.x, coord.y);
+//			cout << coord << endl;
+//			if (coord.x >= 0 and coord.y >= 0 and coord.z >= 0){
+//
+//				/* Indexes of the buffers  */
+//				int xIndx = static_cast<double>(DEFAULT_WIDTH / 2) - 1 + x;
+//				int yIndx = static_cast<double>(DEFAULT_HEIGHT / 2) - 1 - y;
+//				
+//				double currentInvZ = coord.x * cObj -> x[indexes[0]][3].z + 
+//						     coord.y * cObj -> x[indexes[1]][3].z + 
+//						     coord.z * cObj -> x[indexes[2]][3].z;
+//
+//							
+//				/* depth test  */
+//				if (currentInvZ > (this -> depthBuffer[yIndx][xIndx])){
+//
+//					this -> depthBuffer[yIndx][xIndx] = currentInvZ;
+//					this -> frameBuffer[yIndx][xIndx] = currentColor;
+//				}
+//			}
+//		}
+//	}
+//}
+//
 
-void Rasterizer::renderTriangle(const vector<int>& indexes){
-	/* Adds the triangle to the buffers */	
-	
-	double roof = static_cast<double> (RAND_MAX);
-	array<double, 3> currentColor = {static_cast<double>(rand() / roof),
-				        	static_cast<double>(rand() / roof), 
-				        	static_cast<double>(rand() / roof)};
+void Rasterizer::renderTriangle(const vector<int>& indx){
+
+	double roof = static_cast<double>(RAND_MAX);
+	array<double, 3> color = {static_cast<double>(rand()) / roof,
+		   		  static_cast<double>(rand()) / roof,
+				  static_cast<double>(rand()) / roof};
+
+	Vector vec0 = cObj -> x[indx[0]][3];
+	Vector vec1 = cObj -> x[indx[1]][3];
+	Vector vec2 = cObj -> x[indx[2]][3];
 
 
-	// Barycentric rasterizer
-	Vector2 q1 = Vector2(cObj -> x[indexes[1]][3] - cObj -> x[indexes[0]][3]);
-	Vector2 q2 = Vector2(cObj -> x[indexes[2]][3] - cObj -> x[indexes[0]][3]);
+	Vector2 q1 = Vector2(vec1 - vec0);
+	Vector2 q2 = Vector2(vec2 - vec0);
 
 	double scl = q1 * q2;
-	Matrix2 mat1 =  Matrix2(Vector2(norm2(q1), scl), Vector2(scl, norm2(q2)));
+	
+	Matrix2 mat = inv(Matrix2(Vector2(q1 * q1, scl), Vector2(scl, q2 * q2)));
 
-	Matrix2 mat = inv(Matrix2(Vector2(norm2(q1), scl),
-				  Vector2(scl, norm2(q2))));
-	cout << mat1 * mat << endl;
-	BBoxRasterizer bbox = this -> findBoundingBox(cObj -> x[indexes[0]][3],
-						      cObj -> x[indexes[1]][3],
-						      cObj -> x[indexes[2]][3]);
+	BBoxRasterizer bbox = this -> findBoundingBox(vec0, vec1, vec2);
 
-	for (int x = static_cast<int>(bbox.LL.x); x < static_cast<int>(bbox.TR.x); x++){
+	int startX = static_cast<int>(bbox.LL.x);
+	int endX = static_cast<int>(bbox.TR.x);
+	int startY = static_cast<int>(bbox.LL.y);
+	int endY = static_cast<int>(bbox.TR.y);
 
-		for (int y = static_cast<int>(bbox.LL.y); x < static_cast<int>(bbox.TR.y); y++){
+	for (int x = startX; x <= endX; x++){
 
-			Vector2 currentPosition = Vector2(static_cast<double>(x) - cObj -> x[indexes[0]][3].x, static_cast<double>(y) - cObj -> x[indexes[0]][3].y);
-			
-			/* Barycentric coordinates calculation  */
-			Vector2 coord2 = mat * Vector2(currentPosition * q1, currentPosition * q2);
-			Vector coord = Vector(1 - coord.x - coord.y, coord.x, coord.y);
+		for (int y = startY; y <= endY; y++){
 
-			if (coord.x >= 0 and coord.y >= 0 and coord.z >= 0){
-
-				/* Indexes of the buffers  */
-				int xIndx = static_cast<double>(DEFAULT_WIDTH / 2) - 1 + x;
-				int yIndx = static_cast<double>(DEFAULT_HEIGHT / 2) - 1 - y;
+			Vector2 q = Vector2(static_cast<double>(x) - vec0.x,
+					    static_cast<double>(y) - vec0.y);
 				
-				double currentInvZ = coord.x * cObj -> x[indexes[0]][3].z + 
-						     coord.y * cObj -> x[indexes[1]][3].z + 
-						     coord.z * cObj -> x[indexes[2]][3].z;
+			Vector2 coord2 = mat * Vector2(q * q1, q * q2);
+			Vector coord = Vector(1.0 - coord2.x - coord2.y, coord2.x, coord2.y);
 
-							
-				/* depth test  */
-				if (currentInvZ > (this -> depthBuffer[yIndx][xIndx])){
+			if (nonNegative(coord)){
+				/* for all the points of the triangle  */
+				
+				double invZ = coord.x * vec0.z + coord.y * vec1.z + coord.z * vec2.z;
+				
+				int xIndx = static_cast<int>(DEFAULT_WIDTH / 2) - 1 + x;
+                                int yIndx = static_cast<int>(DEFAULT_HEIGHT / 2) - 1 - y;
 
-					this -> depthBuffer[yIndx][xIndx] = currentInvZ;
-					this -> frameBuffer[yIndx][xIndx] = currentColor;
+				if (invZ >= (this -> depthBuffer[yIndx][xIndx])){
+					/* depth test  */
+
+					depthBuffer[yIndx][xIndx] = invZ;
+					frameBuffer[yIndx][xIndx] = color;
 				}
+			
 			}
 		}
 	}
 }
-
-
-
-
 
 
 
@@ -193,11 +246,6 @@ void Rasterizer::render(void){
 			
 			cObj = obj;							// pointer to the current obj
 			
-			double roof = static_cast<double> (RAND_MAX);
-			array<double, 3> color = {static_cast<double>(rand() / roof),
-						static_cast<double>(rand() / roof), 
-						static_cast<double>(rand() / roof)};
-
 			this -> renderTriangle(index);
 			
 	
