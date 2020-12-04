@@ -5,7 +5,7 @@
 #include "Camera.h"
 #include "Object.h"
 #include "Rasterizer.h"
-
+#include "Light.h"
 
 
 class WorldSpace{
@@ -14,19 +14,18 @@ class WorldSpace{
 
 	Camera cam;
 	vector<shared_ptr<Object> > objectPtrs;
+	shared_ptr<Light> light;		/* TODO:	 will become a vector  */
 
 	Rasterizer rast;
-
-
-
 
 	public:
 
 	WorldSpace(void):
 		cam(Camera(Vector(.0, .0, -5.0),
-			   Vector()))		{}
+			   Vector()))	{}
 	
 	void addObject(Object& newObj);
+	void addLight(Light& newLight);
 	void updateVertices(void);
 
 	void rasterize(void);
@@ -41,6 +40,12 @@ class WorldSpace{
 void WorldSpace::addObject(Object& newObj){
 
 	(this -> objectPtrs).emplace_back(&newObj);
+}
+
+
+void WorldSpace::addLight(Light& newLight){
+
+	this -> light = shared_ptr<Light>(&newLight);
 }
 
 
@@ -59,7 +64,7 @@ void WorldSpace::rasterize(void){
 
 	for (auto& obj: objectPtrs){
 
-		rast.rasterizeObject(obj);
+		rast.rasterizeObject(obj, this -> light);
 	}
 }
 

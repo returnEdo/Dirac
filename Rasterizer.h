@@ -4,9 +4,11 @@
 #include "Object.h"
 #include <vector>
 #include <array>
+#include <cmath>
 #include "Vector.h"
 #include "Vector2.h"
 #include "Matrix2.h"
+#include "Light.h"
 #include <GL/glut.h>
 
 #ifndef DEFAULT_WIDTH
@@ -42,13 +44,17 @@ class Rasterizer{
 	array<array<double, static_cast<int>(DEFAULT_WIDTH)>, static_cast<int>(DEFAULT_HEIGHT)>  depthBuffer;
 	array<array<array<double, 3>,  static_cast<int>(DEFAULT_WIDTH)>, static_cast<int>(DEFAULT_HEIGHT)>  frameBuffer;
 
+	array<double, 3> getColor(const Vector& vec0, const Vector& vec1,
+				  const Vector& vec2, const Vector& coord,
+				  const array<double, 3>& color, shared_ptr<Light> light) const ;
+
 	public:
 
 	Rasterizer(void);
 	BBoxRasterizer findBoundingBox(const Vector& v1, const Vector& v2, const Vector& v3);
-	void rasterizeTriangle(const vector<int>& indexes);
+	void rasterizeTriangle(const vector<int>& indexes, shared_ptr<Light> light);
 	void paintCanvas(void);
-	void rasterizeObject(shared_ptr<Object> ptr);
+	void rasterizeObject(shared_ptr<Object> ptr, shared_ptr<Light> light);
 
 };
 
@@ -64,6 +70,43 @@ Rasterizer::Rasterizer(void){
 		}
 	}
 }
+
+
+array<double, 3> Rasterizer::getColor(const Vector& vec0, const Vector& vec1,
+				      const Vector& vec2, const Vector& coord,
+				      const array<double, 3>& color, shared_ptr<Light> light) const{
+	/* coord are the baricentric coordinates  */
+
+	array<double, 3> newcolor;
+	
+	/* TODO: set ambient light in the light class  */
+	
+	array<double, 3> ambient = {.3, .2, .2};
+
+	Vector Q;
+	Vector L;
+
+	Q = (vec1 - vec0) ^ (vec2 - vec0);
+	L = (light -> P - vec0);
+	
+	L.normalize();
+	Q.normalize();
+
+	double prod = Q * L;
+
+	if (prod >= 0){
+		
+		for (int i = 0; i < 3; i++){
+			
+			newcolor[i] = color[i] * (light -> color)[i] * prod + ambient[i];
+		}
+
+		return newcolor; 
+	}
+	
+	return ambient;
+}
+
 
 
 
@@ -87,11 +130,9 @@ BBoxRasterizer Rasterizer::findBoundingBox(const Vector& v1, const Vector& v2, c
 
 
 
-void Rasterizer::rasterizeTriangle(const vector<int>& indx){
-	double roof = static_cast<double>(RAND_MAX);
-	array<double, 3> color = {static_cast<double>(rand()) / roof,
-		   		  static_cast<double>(rand()) / roof,
-				  static_cast<double>(rand()) / roof};
+void Rasterizer::rasterizeTriangle(const vector<int>& indx, shared_ptr<Light> light){
+
+	array<double, 3> color = {.1, 1.0, .1};
 
 	Vector vec0 = cObj -> x[indx[0]][3];
 	Vector vec1 = cObj -> x[indx[1]][3];
@@ -128,15 +169,21 @@ void Rasterizer::rasterizeTriangle(const vector<int>& indx){
 				
 				int xIndx = static_cast<int>(DEFAULT_WIDTH / 2) - 1 + x;
                                 int yIndx = static_cast<int>(DEFAULT_HEIGHT / 2) - 1 - y;
+
 				if (yIndx >= 0 & yIndx <= static_cast<int>(DEFAULT_HEIGHT) -1 and xIndx >= 0 and xIndx <= static_cast<int>(DEFAULT_WIDTH) - 1){
+
 					if (invZ >= (this -> depthBuffer[yIndx][xIndx])){
 						/* depth test  */
 
 						depthBuffer[yIndx][xIndx] = invZ;
-						frameBuffer[yIndx][xIndx] = color;
+						frameBuffer[yIndx][xIndx] = getColor(cObj -> x[indx[0]][1],
+										    cObj -> x[indx[1]][1],
+										    cObj -> x[indx[2]][1],
+										    coord,
+										    color,
+										    light);
 					}
 				}
-			
 			}
 		}
 	}
@@ -167,14 +214,14 @@ void Rasterizer::paintCanvas(void){
 
 
 
-void Rasterizer::rasterizeObject(shared_ptr<Object> ptr){
+void Rasterizer::rasterizeObject(shared_ptr<Object> ptr, shared_ptr<Light> light){
 	/* Renders all the objects on the render list  */
 	
 	(this -> cObj) = ptr;
 
 	for (auto &index: cObj -> buffers.indexBuffer){
 		
-		this -> rasterizeTriangle(index);
+		this -> rasterizeTriangle(index, light);
 		
 	}
 }

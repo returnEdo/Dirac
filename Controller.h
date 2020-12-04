@@ -9,7 +9,7 @@
 
 
 #ifndef DELTA_MOVEMENT
-#define DELTA_MOVEMENT .1
+#define DELTA_MOVEMENT .5
 #endif
 
 

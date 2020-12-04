@@ -32,7 +32,7 @@ class Vector{
 	
 	friend Vector operator ^(const Vector& a, const Vector& b);			// vector product
 	friend bool operator ==(const Vector& a, const Vector& b);	
-	
+	friend Vector operator %(const Vector& a, const Vector& b);   // blending operator	
 	double& operator [](const int indx);								// indexing
 	
 	void operator +=(const Vector &a);
@@ -107,6 +107,11 @@ Vector operator ^(const Vector& a, const Vector& b){
 bool operator ==(const Vector& a, const Vector& b){
 	
 	return (a.x == b.x and a.y == b.y and a.z == b.z);
+}
+
+Vector operator %(const Vector& a, const Vector& b){
+
+	return Vector(a.x * b.x, a.y * b.y, a.z * b.z);
 }
 
 

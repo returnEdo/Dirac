@@ -24,6 +24,12 @@ struct Buffers{
 
 
 class Object{
+
+
+	private:
+
+	Rotation Mtheta;
+
 	
 	public:
 	
@@ -59,7 +65,7 @@ Object::Object(const string& address,
 	       const Vector& xg0,
 	       const Vector& theta0,
 	       double z00):
-			xcg(xg0), theta(theta0), z0(z00) {
+			xcg(xg0), theta(theta0), z0(z00), Mtheta(Rotation(theta0)) {
 	
 	vector<Vector> xM;
 	
@@ -79,8 +85,8 @@ Object::Object(const string& address,
 void Object::updateVertices(const Camera& cam){
 	/* Finds the cam vertices */
 	
-	Rotation Mtheta = Rotation(this -> theta, {1, 2, 3});
-	Rotation MthetaCam = Rotation(cam.thetaCam, {3, 2, 1});
+	Mtheta = Rotation(this -> theta);
+	Rotation MthetaCam = Rotation(cam.thetaCam);
 	double tphi = tan(cam.phi);
 
 	for (int i = 0; i < this -> n; i++){
