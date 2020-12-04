@@ -1,9 +1,20 @@
+#include <array>
 #include <iostream>
 #include <fstream>
 #include <assert.h>
 #include <string>
 #include <vector>
 #include "Vector.h"
+
+
+struct Buffers{
+
+	std::vector<std::vector<int> > indexBuffer;
+	std::vector<std::vector<int> > uvBuffer;
+	std::vector<std::vector<int> > normalBuffer;
+};
+
+
 
 
 void cautiosInsertionDouble(std::string& word, std::vector<double>& vec){
@@ -34,92 +45,143 @@ void cautiosInsertionInt(std::string& word, std::vector<int>& vec){
 }
 
 
-int main(){
+Vector convertToVector(const std::vector<std::string>& vecs){
 
-	std::vector<Vector> ModelVertices;	
-	std::vector<std::vector<int> > indexBuffer;
-	std::string address = "monkey.obj"; 
+	try{
+		Vector val = Vector();
 
 
-	std::ifstream MyFile(address);
+		val.x = std::stod(vecs[0]);
+		val.y = std::stod(vecs[1]);
+		val.z = std::stod(vecs[2]);
 
-	if (MyFile.is_open()){
+		return val;
+	}
+	catch (std::invalid_argument){}
+}
+
+
+std::vector<std::string>  splitByDelimiter(std::string& word, std::string delimiter){
+	/* splits a string using the deliimiter  */
+	
+	std::vector<std::string> dividedString;
+	std::string val;
+
+	size_t n = delimiter.length();
+
+	size_t startPos = 0;
+	size_t endPos = word.find(delimiter, startPos);
+
+	while (endPos != std::string::npos){
+		
+		val = word.substr(startPos, endPos - startPos);
+
+		dividedString.push_back(val);
+
+		startPos = endPos + n;	
+		endPos = word.find(delimiter, startPos);
+	}
+
+	dividedString.push_back(word.substr(startPos, std::string::npos));	// till the end
+	
+	return dividedString;
+}
+
+
+void addToTheBuffers(Buffers& buff, std::vector<std::string>& splittedLine){
+
+	std::vector<int> tempib;
+	std::vector<int> tempuv;
+	std::vector<int> tempn;
+	
+	for (std::string& str: splittedLine){
+
+		std::vector<std::string> values = splitByDelimiter(str, "/");
+
+		tempib.push_back(std::stoi(values[0]) - 1);
+		tempuv.push_back(std::stoi(values[1]) - 1);
+		tempn.push_back(std::stoi(values[2]) - 1);
+	}
+
+	buff.indexBuffer.push_back(tempib);
+	buff.uvBuffer.push_back(tempuv);
+	buff.normalBuffer.push_back(tempn);
+}
+
+
+void getObject(const std::string& address,
+	       std::vector<Vector>& xM,
+       	       std::vector<Vector>& n,
+	       Buffers& buffer){
+	/* complete .obj parser  */
+
+	std::string space = " ";
+	std::string vertexKey = "v ";
+	std::string textureKey = "vt ";
+	std::string normalKey = "vn ";
+	std::string buffersKey = "f ";
+
+	std::ifstream fl(address);
+
+	if (fl.is_open()){			// checks the file has been correctly opened
 
 		std::string currentLine;
 
-		while(getline(MyFile, currentLine)){
+		while(getline(fl, currentLine)){
 			
-			if (currentLine.substr(0, 2) == "v "){
-				/* The line is vertex data  */
+			size_t endPos = currentLine.find(space);
+
+			std::string keyword = currentLine.substr(0, endPos + 1);
+			std::string remaingLine = currentLine.substr(endPos + 1, std::string::npos);
+			
+
+			if (keyword  == vertexKey){
+				/* parsing vertices coordinates  */
 				
-				std::vector<double> vec;
-								
-				std::string token = " ";
+				std::vector<std::string> temp = splitByDelimiter(remaingLine, space);
 
-				size_t startPos = 0;
-				size_t endPos = currentLine.find(token); 
-
-				while (endPos != std::string::npos){			// as long as there's the token
-
-					std::string word = currentLine.substr(startPos, endPos - startPos); // works with increments
-					
-
-					cautiosInsertionDouble(word, vec);					
-
-					startPos = endPos + token.length();
-					endPos = currentLine.find(token, startPos);
-				}
-
-				std::string word = currentLine.substr(startPos, endPos);
-				
-				cautiosInsertionDouble(word, vec);
-
-				assert(vec.size() == 3);
-				
-				ModelVertices.push_back(Vector(vec));
-				vec.clear();
-
-
+				xM.push_back(convertToVector(temp));
+			}
+			else if (keyword == textureKey){
+				/* uv texture coordinates  */
 
 			}
-			else if (currentLine.substr(0, 2) == "f "){
+			else if (keyword == normalKey){
+				/* vertex normals  */
 
-				std::vector<int> vec;
+				std::vector<std::string> temp = splitByDelimiter(remaingLine, space);
 
-				std::string token = " ";
-
-				size_t startPos = 0;
-				size_t endPos = currentLine.find(token);
-
-				while (endPos != std::string::npos){
-
-					std::string word = currentLine.substr(startPos, endPos - startPos);
-
-					cautiosInsertionInt(word, vec);
-
-					startPos = endPos + token.length();
-					endPos = currentLine.find(token, startPos);
-				}
-
-				std::string word = currentLine.substr(startPos, endPos);
-				cautiosInsertionInt(word, vec);
-
-				assert(vec.size() == 3);
-
-				indexBuffer.push_back(vec);
-
-				std::cout << vec[0] << "\t"<< vec[1] << "\t" << vec[2] << std::endl;
-
-				vec.clear();
+				n.push_back(convertToVector(temp));
 			}
-		}	
+			else if (keyword == buffersKey){
 
+				std::vector<std::string> temp = splitByDelimiter(remaingLine, space);
+				
+				addToTheBuffers(buffer, temp);
+			}
+		}
 	}
-	std::cout << ModelVertices.size() << std::endl;
+}
 
-	for (auto const& Vertex: ModelVertices){
 
-		std::cout << Vertex << std::endl;
+
+
+
+int main(){
+	
+
+	Buffers buff;
+	std::string address = "cube.obj";
+	
+	std::vector<Vector> xM;
+	std::vector<Vector> normals;
+
+	getObject(address, xM, normals, buff);
+	
+	for (auto const& x: buff.uvBuffer){
+
+		std::cout << x[0] << " " << x[1] << " " << x[2] << std::endl;
 	}
 
+	return 0;
 }
