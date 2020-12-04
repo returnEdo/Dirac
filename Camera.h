@@ -3,7 +3,6 @@
 #include <iostream>
 #include <cmath>
 #include "Vector.h"
-#include "Object.h"
 #include "Rotation.h"
 
 #ifndef DEFAULT_WIDTH

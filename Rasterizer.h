@@ -172,7 +172,7 @@ void Rasterizer::rasterizeObject(shared_ptr<Object> ptr){
 	
 	(this -> cObj) = ptr;
 
-	for (auto &index: cObj -> indexBuffer){
+	for (auto &index: cObj -> buffers.indexBuffer){
 		
 		this -> rasterizeTriangle(index);
 		

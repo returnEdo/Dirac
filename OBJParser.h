@@ -1,134 +1,154 @@
 #pragma once
 
-
+#include <array>
+#include <iostream>
 #include <fstream>
+#include <assert.h>
 #include <string>
 #include <vector>
-#include <assert.h>
 #include "Vector.h"
+#include "Vector2.h"
+#include "Object.h"
+
+#ifndef BUFFERS_STRUCT
+#define BUFFERS_STRUCT
+struct Buffers{
+
+	vector<vector<int> > indexBuffer;
+	vector<vector<int> > uvBuffer;
+	vector<vector<int> > normalBuffer;
+};
+#endif
 
 
 
-void cautiosInsertionDouble(std::string& word, std::vector<double>& vec){
-	/* Attentive insertion  */
+Vector2 convertToVector2(const std::vector<std::string>& vecs){
 
 	try{
-		vec.push_back(std::stod(word));
-	}
-	catch (std::invalid_argument){
+		Vector2 val = Vector2();
 
+
+		val.x = std::stod(vecs[0]);
+		val.y = std::stod(vecs[1]);
+
+		return val;
 	}
+	catch (std::invalid_argument){}
 }
 
 
+Vector convertToVector(const std::vector<std::string>& vecs){
 
-void cautiosInsertionInt(std::string& word, std::vector<int>& vec){
+	try{
+		Vector val = Vector();
 
-	if (word[0] != 'f'){
-		
-		std::string divider = "/";
 
-		try{
+		val.x = std::stod(vecs[0]);
+		val.y = std::stod(vecs[1]);
+		val.z = std::stod(vecs[2]);
 
-			vec.push_back(std::stoi(word.substr(0, word.find(divider))) - 1);
-		}
-		catch (std::invalid_argument)	{ }
+		return val;
 	}
+	catch (std::invalid_argument){}
 }
 
 
-bool typeCheck(const std::string& address){
-
-	int n = address.length();
-	size_t dotPosition = address.find(".");
-
-	if (address.substr(dotPosition + 1, n - dotPosition) == "obj"){ return true; }
-
-	return false;
-}
-
-
-void getObject(const std::string& address, std::vector<Vector>& ModelVertices,
-		std::vector<std::vector<int> >& indexBuffer){
-	/* Parses model vertices and index buffer from an obj file  */
+std::vector<std::string>  splitByDelimiter(std::string& word, std::string delimiter){
+	/* splits a string using the deliimiter  */
 	
-	if (not(typeCheck(address))) { return; }
+	std::vector<std::string> dividedString;
+	std::string val;
+
+	size_t n = delimiter.length();
+
+	size_t startPos = 0;
+	size_t endPos = word.find(delimiter, startPos);
+
+	while (endPos != std::string::npos){
+		
+		val = word.substr(startPos, endPos - startPos);
+
+		dividedString.push_back(val);
+
+		startPos = endPos + n;	
+		endPos = word.find(delimiter, startPos);
+	}
+
+	dividedString.push_back(word.substr(startPos, std::string::npos));	// till the end
+	
+	return dividedString;
+}
 
 
-	std::string token = " ";
+void addToTheBuffers(Buffers& buff, std::vector<std::string>& splittedLine){
 
-	std::ifstream MyFile(address);
+	std::vector<int> tempib;
+	std::vector<int> tempuv;
+	std::vector<int> tempn;
+	
+	for (std::string& str: splittedLine){
 
-	if (MyFile.is_open()){
+		std::vector<std::string> values = splitByDelimiter(str, "/");
+
+		tempib.push_back(std::stoi(values[0]) - 1);
+		tempuv.push_back(std::stoi(values[1]) - 1);
+		tempn.push_back(std::stoi(values[2]) - 1);
+	}
+
+	buff.indexBuffer.push_back(tempib);
+	buff.uvBuffer.push_back(tempuv);
+	buff.normalBuffer.push_back(tempn);
+}
+
+
+void getObject(const std::string& address,
+	       std::vector<Vector>& xM,
+       	       std::vector<Vector>& n,
+	       std::vector<Vector2>& uvs,
+	       Buffers& buffer){
+	/* complete .obj parser  */
+
+	std::string space = " ";
+	std::string vertexKey = "v ";
+	std::string textureKey = "vt ";
+	std::string normalKey = "vn ";
+	std::string buffersKey = "f ";
+
+	std::ifstream fl(address);
+
+	if (fl.is_open()){			// checks the file has been correctly opened
 
 		std::string currentLine;
-		
-		/* scans alla the lines  */
-		while(getline(MyFile, currentLine)){
+
+		while(getline(fl, currentLine)){
 			
-			if (currentLine.substr(0, 2) == "v "){
-				/* The line is vertex data  */
+			size_t endPos = currentLine.find(space);
+
+			std::string keyword = currentLine.substr(0, endPos + 1);
+			std::string remainingLine = currentLine.substr(endPos + 1, std::string::npos);
+			std::vector<std::string> temp = splitByDelimiter(remainingLine, space);
+
+			if (keyword  == vertexKey){
+				/* parsing vertices coordinates  */
 				
-				std::vector<double> vec;
-								
-				std::string token = " ";
-
-				size_t startPos = 0;
-				size_t endPos = currentLine.find(token); 
-
-				while (endPos != std::string::npos){			// as long as there's the token
-
-					std::string word = currentLine.substr(startPos, endPos - startPos); // works with increments
-					
-
-					cautiosInsertionDouble(word, vec);					
-
-					startPos = endPos + token.length();
-					endPos = currentLine.find(token, startPos);
-				}
-
-				std::string word = currentLine.substr(startPos, endPos);
-				
-				cautiosInsertionDouble(word, vec);
-
-				assert(vec.size() == 3);
-				
-				ModelVertices.push_back(Vector(vec));
-				vec.clear();
-
-
-
+				xM.push_back(convertToVector(temp));
 			}
-			else if (currentLine.substr(0, 2) == "f "){
+			else if (keyword == textureKey){
+				/* uv texture coordinates  */
 
-				std::vector<int> vec;
-
-				std::string token = " ";
-
-				size_t startPos = 0;
-				size_t endPos = currentLine.find(token);
-
-				while (endPos != std::string::npos){
-
-					std::string word = currentLine.substr(startPos, endPos - startPos);
-
-					cautiosInsertionInt(word, vec);
-
-					startPos = endPos + token.length();
-					endPos = currentLine.find(token, startPos);
-				}
-
-				std::string word = currentLine.substr(startPos, endPos);
-				cautiosInsertionInt(word, vec);
-
-				assert(vec.size() == 3);
-
-				indexBuffer.push_back(vec);
-
-				vec.clear();
+				uvs.push_back(convertToVector2(temp));
 			}
-		}	
+			else if (keyword == normalKey){
+				/* vertex normals  */
 
+				n.push_back(convertToVector(temp));
+			}
+			else if (keyword == buffersKey){
+
+				addToTheBuffers(buffer, temp);
+			}
+		}
 	}
-
 }
+
+
