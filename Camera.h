@@ -15,12 +15,9 @@ class Camera{
 	Matrix attitude;		// cam to world matrix
 
 	/* projections settings */
-	
-	float deltax	= Constants::DELTAX;
-	float deltaz	= Constants::DELTAZ;
-
-	float near	= Constants::NEAR_PLANE;
-
+	float deltax		= Constants::DELTAX;
+	float deltaz		= Constants::DELTAZ;
+	float near		= Constants::NEAR_PLANE;
 	float aspectRatio 	= Constants::ASPECT_RATIO;
 
 
@@ -38,7 +35,7 @@ class Camera{
 	inline void setAspectRatio(float aspectRatio_)		{ aspectRatio = aspectRatio_; }	
 	inline void setDeltaX(float deltax_)			{ deltax = deltax_; }
 
-///	void lookAt(const Vector& x);
+	void lookAt(const Vector& x);
 
 	virtual void updateUniforms(Shader& shader) const;
 };

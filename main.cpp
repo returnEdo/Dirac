@@ -17,42 +17,41 @@
 
 int main()
 {
+	/* window manager */
 	Manager manager("Dirac Demo");
+	
+	/* programs that run on the GPU... */
+	/* ...for objects... */
+	Shader objectShader("resources/shaders/meshVertexShader.shader", "resources/shaders/meshFragmentShader.shader");
+	
+	Mesh object("resources/models/meshCube.dirac", Vector(), Matrix(Vector(1.0f, .0f, .0f),  .0f));
 
-	Shader lineShader("resources/shaders/lineVertexShader.shader", "resources/shaders/basicFragmentShader.shader");
-	Shader objectShader("resources/shaders/objectVertexShader.shader", "resources/shaders/basicFragmentShader.shader");
-
-	Line line(Vector(-2.0f, -2.0f, .0f), Vector(2.0f, 2.0f, .0f), Vector(.7f, .2f, .2f));
-	Object object("resources/models/square.dirac", Vector(), Matrix(Vector(1.0f, .0f, .0f),  .0f));
-
-	Camera camera(Vector(.0f, .0f, 5.0f), Matrix(Vector(.0f, 1.0f, .0f), .00f));
-
-
+	Camera camera(Vector(-5.0f, 5.0f, 5.0f), Matrix(Vector(.0f, 1.0f, .0f), .00f));
+	camera.lookAt(Vector());
+	
 	float t = .0f;
-	float dt = .02f;
-	float r = .2f;
-	// render loop
+	float dt = .03f;
+
+	glEnable(GL_DEPTH_TEST);
+	/* main loop */
 	while (manager.shouldRun())
 	{	
-		t += dt;
 
+		t += dt;
+		object.setAttitude(Matrix(Vector(.0f, 1.0f, .0f), t));
+		
+		/* connect the program */
 		objectShader.bind();
+		/* update camera data */
 		camera.updateUniforms(objectShader);
-		object.updateUniforms(objectShader);
+		/* and finally draw */
 		object.render(objectShader);
 		
-		lineShader.bind();
-		camera.updateUniforms(lineShader);
-		line.render(lineShader);
-
-
+		/* clears the screen and polls the events */
 		manager.update();
-
-		if (Manager::isPressed(GLFW_KEY_SPACE)){
-
-			std::cout << "space" << std::endl;
-		}
-		else if(Manager::isPressed(GLFW_KEY_ESCAPE))	{ manager.shouldDie();}
+		
+		/* we can query the manager for the state of the buttons */
+		if(Manager::isPressed(GLFW_KEY_ESCAPE))	{ manager.shouldDie();}
 
 	}
 
