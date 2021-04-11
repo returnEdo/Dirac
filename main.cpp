@@ -8,6 +8,7 @@
 #include "Buffers.h"
 #include "Geometry.h"
 #include "Camera.h"
+#include "Light.h"
 #include "Manager.h"
 #include "DiracConstants.h"
 
@@ -25,6 +26,8 @@ int main()
 	Shader objectShader("resources/shaders/meshVertexShader.shader", "resources/shaders/meshFragmentShader.shader");
 	
 	Mesh object("resources/models/meshCube.dirac", Vector(), Matrix(Vector(1.0f, .0f, .0f),  .0f));
+
+	Light light(Vector(10.0f));
 
 	Camera camera(Vector(-5.0f, 5.0f, 5.0f), Matrix(Vector(.0f, 1.0f, .0f), .00f));
 	camera.lookAt(Vector());
@@ -44,7 +47,12 @@ int main()
 		objectShader.bind();
 		/* update camera data */
 		camera.updateUniforms(objectShader);
+		light.updateUniforms(objectShader);
 		/* and finally draw */
+		object.setPosition(Vector());
+		object.render(objectShader);
+
+		object.setPosition(Vector(.0f, 3.0f, .0f));
 		object.render(objectShader);
 		
 		/* clears the screen and polls the events */

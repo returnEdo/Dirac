@@ -57,7 +57,7 @@ Mesh::Mesh(const std::string& address,
 void Mesh::render(Shader& shader, unsigned int primitive){
 	/* bind program and vao*/
 
-	shader.bind();
+//	shader.bind();
 	updateUniforms(shader);
 
 	vertexArray -> bind();
