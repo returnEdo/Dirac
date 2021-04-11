@@ -57,5 +57,6 @@ class Manager{
 	/* utility */
 	inline bool shouldRun(void) const					{ return (not glfwWindowShouldClose(window)); }
 	inline void shouldDie(void)						{ glfwSetWindowShouldClose(window, true); }
+	void clear(void);
 	void update(void);
 };

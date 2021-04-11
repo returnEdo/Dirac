@@ -22,4 +22,7 @@ namespace Constants{
 	const float 		DELTAX			= 10.0f;
 	const float 		DELTAZ			= 100.0f;
 	const float		NEAR_PLANE		= 0.5f;
+
+	/* batch line */
+	const unsigned int 	MAX_ISTANCES		= 100;
 };

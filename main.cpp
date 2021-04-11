@@ -21,44 +21,35 @@ int main()
 	/* window manager */
 	Manager manager("Dirac Demo");
 	
-	/* programs that run on the GPU... */
-	/* ...for objects... */
-	Shader objectShader("resources/shaders/meshVertexShader.shader", "resources/shaders/meshFragmentShader.shader");
+	Shader objectShader("resources/shaders/segmentVertexShader.shader", "resources/shaders/basicFragmentShader.shader");
 	
-	Mesh object("resources/models/meshCube.dirac", Vector(), Matrix(Vector(1.0f, .0f, .0f),  .0f));
+	Segment seg1(Vector(-1.0f, .0f, .0f), Vector(1.0f, .0f, .0f), Vector(1.0f, .0f, .0f));
+	Segment seg2(Vector(1.0f, .0f, .0f), Vector(1.0f, 1.0f, .0f), Vector(.0f, 1.0f, .0f));
 
 	Light light(Vector(10.0f));
 
-	Camera camera(Vector(-5.0f, 5.0f, 5.0f), Matrix(Vector(.0f, 1.0f, .0f), .00f));
+	Camera camera(Vector(.0f, .0f, 5.0f), Matrix(Vector(.0f, 1.0f, .0f), .00f));
 	camera.lookAt(Vector());
 	
 	float t = .0f;
 	float dt = .03f;
 
-	glEnable(GL_DEPTH_TEST);
 	/* main loop */
 	while (manager.shouldRun())
 	{	
+		manager.clear();
 
 		t += dt;
-		object.setAttitude(Matrix(Vector(.0f, 1.0f, .0f), t));
-		
-		/* connect the program */
-		objectShader.bind();
-		/* update camera data */
-		camera.updateUniforms(objectShader);
-		light.updateUniforms(objectShader);
-		/* and finally draw */
-		object.setPosition(Vector());
-		object.render(objectShader);
 
-		object.setPosition(Vector(.0f, 3.0f, .0f));
-		object.render(objectShader);
+		seg2.setExtrema(Vector(1.0f, .0f, .0f), Vector(1.0f + .2f * sin(t), 1.0f + .2 * cos(t), .0f));
 		
-		/* clears the screen and polls the events */
+		objectShader.bind();
+		camera.updateUniforms(objectShader);
+		//light.updateUniforms(objectShader);
+		seg1.render(objectShader);
+		
 		manager.update();
 		
-		/* we can query the manager for the state of the buttons */
 		if(Manager::isPressed(GLFW_KEY_ESCAPE))	{ manager.shouldDie();}
 
 	}

@@ -39,6 +39,8 @@ Manager::Manager(int width_, int height_, const std::string& title):
 	glfwSetKeyCallback(window, Manager::keyboardCallback);
 	glfwSetMouseButtonCallback(window, Manager::mouseButtonsCallback);
 	glfwSetCursorPosCallback(window, Manager::mousePositionCallback);
+
+	glEnable(GL_DEPTH_TEST);
 }
 
 
@@ -53,16 +55,20 @@ Manager::~Manager(void){
 	glfwTerminate();
 }
 
+void Manager::clear(void){
+
+	glClearColor(backGroundColor.x,
+		     backGroundColor.y,
+		     backGroundColor.z, 1.0f);
+	
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
 
 void Manager::update(void){
 
 	glfwSwapBuffers(window);
 	glfwPollEvents();
-
-	glClearColor(backGroundColor.x,
-		     backGroundColor.y,
-		     backGroundColor.z, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 
