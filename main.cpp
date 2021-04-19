@@ -8,7 +8,6 @@
 #include "Buffers.h"
 #include "Geometry.h"
 #include "Camera.h"
-#include "Light.h"
 #include "Manager.h"
 #include "DiracConstants.h"
 
@@ -21,36 +20,40 @@ int main()
 	/* window manager */
 	Manager manager("Dirac Demo");
 	
-	Shader objectShader("resources/shaders/segmentVertexShader.shader", "resources/shaders/basicFragmentShader.shader");
+	/* programs that run on the GPU... */
+	/* ...for objects... */
+	Shader lineShader("resources/shaders/lineVertexShader.shader", "resources/shaders/basicFragmentShader.shader");
+	/* ...and for lines...*/
+	Shader objectShader("resources/shaders/objectVertexShader.shader", "resources/shaders/basicFragmentShader.shader");
 	
-	Segment seg1(Vector(-1.0f, .0f, .0f), Vector(1.0f, .0f, .0f), Vector(1.0f, .0f, .0f));
-	Segment seg2(Vector(1.0f, .0f, .0f), Vector(1.0f, 1.0f, .0f), Vector(.0f, 1.0f, .0f));
-
-	Light light(Vector(10.0f));
+	Line line(Vector(-2.0f, -2.0f, .0f), Vector(2.0f, 2.0f, .0f), Vector(.7f, .2f, .2f));
+	Object object("resources/models/square.dirac", Vector(), Matrix(Vector(1.0f, .0f, .0f),  .0f));
 
 	Camera camera(Vector(.0f, .0f, 5.0f), Matrix(Vector(.0f, 1.0f, .0f), .00f));
-	camera.lookAt(Vector());
-	
-	float t = .0f;
-	float dt = .03f;
 
 	/* main loop */
 	while (manager.shouldRun())
 	{	
-		manager.clear();
-
-		t += dt;
-
-		seg2.setExtrema(Vector(1.0f, .0f, .0f), Vector(1.0f + .2f * sin(t), 1.0f + .2 * cos(t), .0f));
 		
+		/* connect the program */
 		objectShader.bind();
+		/* update camera data */
 		camera.updateUniforms(objectShader);
-		//light.updateUniforms(objectShader);
-		seg1.render(objectShader);
+		/* and finally draw */
+		object.render(objectShader);
 		
+		/* same as above */
+		lineShader.bind();
+		camera.updateUniforms(lineShader);
+		line.render(lineShader);
+		
+		/* clears the screen and polls the events */
 		manager.update();
 		
+		/* we can query the manager for the state of the buttons */
 		if(Manager::isPressed(GLFW_KEY_ESCAPE))	{ manager.shouldDie();}
+
+		std::cout << manager.getMousePosition() << std::endl;
 
 	}
 
