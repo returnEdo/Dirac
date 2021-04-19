@@ -1,62 +1,166 @@
 #pragma once
 
-#include <string>
-#include <unordered_map>
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
+#include <memory>
 
-#include "DiracConstants.h"
-#include "Vector.h"
-#include "Vector2.h"
+#include "Entity.h"
+#include "System.h"
+#include "EntityManager.h"
+#include "ComponentManager.h"
+#include "SystemManager.h"
 
-class Manager{
 
+
+namespace Dirac
+{
+
+
+
+class Manager
+{
 	private:
 
-	GLFWwindow* window;
-
-	int width;
-	int height;
-
-	Vector backGroundColor	= Constants::BACKGROUND_COLOR;
-	
-	static std::unordered_map<int, int> keyState;
-	static Vector2 mousePosition;
+	std::unique_ptr<EntityManager>		mEntityManager;
+	std::unique_ptr<ComponentManager>	mComponentManager;
+	std::unique_ptr<SystemManager>		mSystemManager;
 
 	public:
 
-	Manager(int width_, int height_, const std::string& title);
-	Manager(const std::string& title);
-	~Manager(void);
+	void init(void);
 
-	/* getters */
-	inline GLFWwindow* getWindow(void)					{ return window; }
+	// Entity life operations
+	EntityID createEntity(void);
+	void removeEntity(EntityID tID);
 
-	inline int getWidth(void)						const { return width; }
-	inline int getHeight(void)						const { return height; }
-	inline float getAspectRatio(void)					const { return (static_cast<float>(width) / static_cast<float>(height)); }
+	// Entity components operations
+	template <typename ComponentType>
+	void addComponent(EntityID tID, ComponentType tComponent);
 
-	static inline const std::unordered_map<int, int>& getKeyState(void) 	{ return Manager::keyState; }
-	static inline const Vector2& getMousePosition(void)			{ return Manager::mousePosition; }
-	
-	static inline bool isPressed(int key)					{ return (Manager::keyState[key] == GLFW_PRESS); }
-	static inline bool isReleased(int key)					{ return (Manager::keyState[key] == GLFW_RELEASE); }
-	static inline bool isHeldDown(int key)					{ return (Manager::keyState[key] == GLFW_REPEAT); } 
+	template <typename ComponentType>
+	void removeComponent(EntityID tID);
 
-	/* setters */
-	inline void wireframe(void)						const { glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); }
-	inline void fill(void)							const { glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); }
-	inline void setBackgroundColor(const Vector& backGroundColor_)		{ backGroundColor = backGroundColor_; }
+	// Component operations
+	template <typename ComponentType>
+	ComponentType& getComponent(EntityID tID);
 
+	template <typename ComponentType>
+	unsigned int getComponentID(void);
 
-	/* callbacks */
-	static void keyboardCallback(GLFWwindow* win, int key, int scancode, int action, int mode);
-	static void mousePositionCallback(GLFWwindow* win, double xpos, double ypos);
-	static void mouseButtonsCallback(GLFWwindow* win, int button, int action, int mode);
+	template <typename ComponentType>
+	void setComponent(EntityID tID, ComponentType& tComponent);
 
-	/* utility */
-	inline bool shouldRun(void) const					{ return (not glfwWindowShouldClose(window)); }
-	inline void shouldDie(void)						{ glfwSetWindowShouldClose(window, true); }
-	void clear(void);
-	void update(void);
+	// System operations
+	template <typename SystemType>
+	void setSignature(Signature& tSignature);
+
+	template <typename SystemType>
+	std::shared_ptr<SystemType> getSystem(void);
 };
+
+
+void Manager::init(void)
+{
+	mEntityManager 		= std::make_unique<EntityManager>();
+	mComponentManager 	= std::make_unique<ComponentManager>();
+	mSystemManager 		= std::make_unique<SystemManager>();
+}
+
+
+EntityID Manager::createEntity(void)
+{
+	return (mEntityManager -> createEntity());
+}
+
+
+void Manager::removeEntity(EntityID tID)
+{
+	// tID is newly available
+	mEntityManager -> removeEntity(tID);
+	
+	// tID is no longer in the componentPools
+	mComponentManager -> entityRemoved(tID);
+	
+	// tID is removed from system entity lists
+	mSystemManager -> entityRemoved(tID);
+}	
+
+
+template <typename ComponentType>
+void Manager::addComponent(EntityID tID, ComponentType tComponent)
+{
+	// find component id
+	unsigned int lComponentID = mComponentManager -> getComponentID<ComponentType>();	
+	
+	// update Entity component mask
+	ComponentMask lComponentMask = mEntityManager -> getComponentMask(tID);
+
+	lComponentMask.set(lComponentID, true);
+	mEntityManager -> setComponentMask(tID, lComponentMask);
+
+	// store new component
+	mComponentManager -> addComponent<ComponentType>(tID, tComponent);
+
+	// update system entity lists
+	mSystemManager -> onComponentMaskUpdate(tID, lComponentMask);
+}
+
+
+template <typename ComponentType>
+void Manager::removeComponent(EntityID tID)
+{
+	// find component id
+	unsigned int lComponentID = mComponentManager -> getComponentID<ComponentType>();	
+	
+	// update Entity component mask
+	ComponentMask lComponentMask = mEntityManager -> getComponentMask(tID);
+
+	lComponentMask.set(lComponentID, false);
+
+	mEntityManager -> setComponentMask(tID, lComponentMask);
+
+	// store new component
+	mComponentManager -> removeComponent<ComponentType>(tID);
+
+	// update system entity lists
+	mSystemManager -> onComponentMaskUpdate(tID, lComponentMask);
+}
+
+
+template <typename ComponentType>
+ComponentType& Manager::getComponent(EntityID tID)
+{
+	return (mComponentManager -> getComponent<ComponentType>(tID));
+}
+
+
+template <typename ComponentType>
+unsigned int Manager::getComponentID(void)
+{
+
+	return (mComponentManager -> getComponentID<ComponentType>());
+}
+
+
+template <typename ComponentType>
+void Manager::setComponent(EntityID tID, ComponentType& tComponent)
+{
+	mComponentManager -> setComponent<ComponentType>(tID, tComponent);
+}
+
+
+template <typename SystemType>
+void Manager::setSignature(Signature& tSignature)
+{	
+	mSystemManager -> setSignature<SystemType>(tSignature);
+}
+
+
+template <typename SystemType>
+std::shared_ptr<SystemType> Manager::getSystem(void)
+{
+	return (mSystemManager -> getSystem<SystemType>());
+}
+
+
+};
+
+
