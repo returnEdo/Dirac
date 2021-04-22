@@ -20,6 +20,114 @@ updates
 namespace Dirac
 {
 
+//
+//class SystemManager
+//{
+//	private:
+//
+//	// the manager owns the systems
+//	std::array<std::shared_ptr<ISystem>, ECSConstants::MAX_SYSTEMS> mSystems;
+//
+//	unsigned int mSystemsCount { 0 };
+//
+//	public:
+//
+//	template <typename SystemType>
+//	unsigned int getSystemID(void);
+//
+//	template <typename SystemType>
+//	void setSignature(const Signature& tSignature);
+//
+//	template <typename SystemType>
+//	Signature& getSignature();
+//
+//	template <typename SystemType>
+//	std::shared_ptr<SystemType> getSystem(void);
+//
+//	void onComponentMaskUpdate(EntityID tID, ComponentMask tComponentMask);
+//
+//	void entityRemoved(EntityID tID);
+//};
+//
+//
+//template <typename SystemType>
+//unsigned int SystemManager::getSystemID(void)
+//{
+//	// managing the unique systems id
+//
+//	static unsigned int sSystemID = mSystemsCount;
+//	static unsigned int sThisSystemCount = 0;
+//	
+//	if (not sThisSystemCount)
+//	{
+//		mSystems[sSystemID] = std::make_shared<ISystem>();
+//		mSystemsCount ++;
+//	}
+//
+//	sThisSystemCount ++;
+//
+//	return sSystemID;
+//}
+//
+//
+//template <typename SystemType>
+//void SystemManager::setSignature(const Signature& tSignature)
+//{
+//	mSystems[getSystemID<SystemType>()] -> mSignature = tSignature;
+//}
+//
+//
+//template <typename SystemType>
+//Signature& SystemManager::getSignature(void)
+//{
+//	// TODO: throw exception
+//
+//	return mSystems[getSystemID<SystemType>()] -> mSignature;
+//}
+//
+//
+//template <typename SystemType>
+//std::shared_ptr<SystemType> SystemManager::getSystem(void)
+//{
+//	return (std::static_pointer_cast<SystemType>(mSystems[getSystemID<SystemType>()]));
+//}
+//
+//
+//void SystemManager::onComponentMaskUpdate(EntityID tID, ComponentMask tComponentMask)
+//{
+//	// Entity list update
+//
+//	for (auto lSystem: mSystems)
+//	{
+//		if (lSystem != nullptr)
+//		{
+//
+//			if (((lSystem -> mSignature) & tComponentMask) == (lSystem -> mSignature))
+//			{
+//				(lSystem -> mEntities).insert(tID);
+//			}
+//			else
+//			{
+//				// returns 0 if no element is erased
+//				(lSystem -> mEntities).erase(tID);
+//			}
+//		}
+//	}
+//}
+//
+//
+//void SystemManager::entityRemoved(EntityID tID)
+//{
+//	for (auto lSystem: mSystems)
+//	{
+//		if (lSystem != nullptr)
+//		{
+//			(lSystem -> mEntities).erase(tID);
+//		}
+//	}
+//}
+//
+
 
 class SystemManager
 {
@@ -33,100 +141,82 @@ class SystemManager
 	public:
 
 	template <typename SystemType>
-	unsigned int getSystemID(void);
-
-	template <typename SystemType>
-	void setSignature(const Signature& tSignature);
-
-	template <typename SystemType>
-	Signature& getSignature();
-
-	template <typename SystemType>
-	std::shared_ptr<SystemType> getSystem(void);
-
-	void onComponentMaskUpdate(EntityID tID, ComponentMask tComponentMask);
-
-	void entityRemoved(EntityID tID);
-};
-
-
-template <typename SystemType>
-unsigned int SystemManager::getSystemID(void)
-{
-	// managing the unique systems id
-
-	static unsigned int sSystemID = mSystemsCount;
-	static unsigned int sThisSystemCount = 0;
-	
-	if (not sThisSystemCount)
+	unsigned int getSystemID(void)
 	{
-		mSystems[sSystemID] = std::make_shared<ISystem>();
-		mSystemsCount ++;
+		// managing the unique systems id
+
+		static unsigned int sSystemID = mSystemsCount;
+		static unsigned int sThisSystemCount = 0;
+		
+		if (not sThisSystemCount)
+		{
+			mSystems[sSystemID] = std::make_shared<ISystem>();
+			mSystemsCount ++;
+		}
+
+		sThisSystemCount ++;
+
+		return sSystemID;
 	}
 
-	sThisSystemCount ++;
 
-	return sSystemID;
-}
-
-
-template <typename SystemType>
-void SystemManager::setSignature(const Signature& tSignature)
-{
-	mSystems[getSystemID<SystemType>()] -> mSignature = tSignature;
-}
-
-
-template <typename SystemType>
-Signature& SystemManager::getSignature(void)
-{
-	// TODO: throw exception
-
-	return mSystems[getSystemID<SystemType>()] -> mSignature;
-}
-
-
-template <typename SystemType>
-std::shared_ptr<SystemType> SystemManager::getSystem(void)
-{
-	return (std::static_pointer_cast<SystemType>(mSystems[getSystemID<SystemType>()]));
-}
-
-
-void SystemManager::onComponentMaskUpdate(EntityID tID, ComponentMask tComponentMask)
-{
-	// Entity list update
-
-	for (auto lSystem: mSystems)
+	template <typename SystemType>
+	void setSignature(const Signature& tSignature)
 	{
-		if (lSystem != nullptr)
-		{
+		mSystems[getSystemID<SystemType>()] -> mSignature = tSignature;
+	}
 
-			if (((lSystem -> mSignature) & tComponentMask) == (lSystem -> mSignature))
+
+	template <typename SystemType>
+	Signature& getSignature(void)
+	{
+		// TODO: throw exception
+
+		return mSystems[getSystemID<SystemType>()] -> mSignature;
+	}
+
+
+	template <typename SystemType>
+	std::shared_ptr<SystemType> getSystem(void)
+	{
+		return (std::static_pointer_cast<SystemType>(mSystems[getSystemID<SystemType>()]));
+	}
+
+
+	void onComponentMaskUpdate(EntityID tID, ComponentMask tComponentMask)
+	{
+		// Entity list update
+
+		for (auto lSystem: mSystems)
+		{
+			if (lSystem != nullptr)
 			{
-				(lSystem -> mEntities).insert(tID);
+
+				if (((lSystem -> mSignature) & tComponentMask) == (lSystem -> mSignature))
+				{
+					(lSystem -> mEntities).insert(tID);
+				}
+				else
+				{
+					// returns 0 if no element is erased
+					(lSystem -> mEntities).erase(tID);
+				}
 			}
-			else
+		}
+	}
+
+
+	void entityRemoved(EntityID tID)
+	{
+		for (auto lSystem: mSystems)
+		{
+			if (lSystem != nullptr)
 			{
-				// returns 0 if no element is erased
 				(lSystem -> mEntities).erase(tID);
 			}
 		}
 	}
-}
-
-
-void SystemManager::entityRemoved(EntityID tID)
-{
-	for (auto lSystem: mSystems)
-	{
-		if (lSystem != nullptr)
-		{
-			(lSystem -> mEntities).erase(tID);
-		}
-	}
-}
-
+};
 
 };
 

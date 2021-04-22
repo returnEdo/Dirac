@@ -75,4 +75,7 @@ namespace Dirac{
 		std::cout << "\n\t- - - - - - - - - - - - - - - - - - - - - - " << std::endl; \
 		exit(1); \
 	}
+
+// DEBUG
+#define DBG PRINT("\t@ line:\t" << __LINE__)
 };

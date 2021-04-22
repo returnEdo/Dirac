@@ -1,50 +1,56 @@
 #pragma once
 
-#include <GL/glew.h>
 #include <string>
 #include <unordered_map>
+#include <GL/glew.h>
 
 #include "Vector2.h"
 #include "Vector.h"
 #include "Matrix.h"
 
 
-enum class SHADER_TYPE{
 
+namespace Dirac
+{
+
+
+enum class ShaderType
+{
 	VERTEX,
-	FRAGMENT,
-	COMPUTE
-};
+	FRAGMENT
+};	
+
+unsigned int getShaderID(const std::string tShaderAddress, ShaderType tType);
 
 
-unsigned int createShader(const std::string& shaderAddress, const SHADER_TYPE& shaderType);
-
-
-class Shader{
-
+class Shader
+{
 	private:
 
-	unsigned int id;	
-	std::unordered_map<std::string, int> uniformLocations;
+	unsigned int mID { };
+	std::unordered_map<std::string, int> mUniformLocations;
 
-	/* buffers for uniforms */
-	float vectorBuffer[3];
-	float matrixBuffer[9];
-
+	// buffers
+	float mVectorBuffer[3];
+	float mMatrixBuffer[9];
+	
 	public:
 
-	Shader(const std::string& vertexShaderAddress, const std::string& fragmentShaderAddr);
-	~Shader(void);
-	
-	/* uniforms */
-	void setUniform(const std::string& uniform, float newValue);
-	void setUniform(const std::string& uniform, const Vector2& newValue);
-	void setUniform(const std::string& uniform, const Vector& newValue);
-	void setUniform(const std::string& uniform, const Matrix& newValue);
+	Shader(const std::string& tVertexShaderAddress,
+	       const std::string& tFragmentShaderAddress);
 
-	
-	/* binding */
-	void bind(void) const;
-	void unbind(void) const;
+	~Shader(void);
+
+	void bind(void);
+	void unbind(void);
+
+
+	void setUniform(const std::string& tUniform, float newValue);
+	void setUniform(const std::string& tUniform, const Vector2& newValue);
+	void setUniform(const std::string& tUniform, const Vector& newValue);
+	void setUniform(const std::string& tUniform, const Matrix& newValue);
+
+};
+
 
 };

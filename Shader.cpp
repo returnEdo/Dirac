@@ -1,130 +1,124 @@
 #include "Shader.h"
 
-#include <iostream>
-#include <fstream>
 
-#include "StringInput.h"
-#include "DiracConstants.h"
+#include "DiracMacros.h"
+#include "Parser.h"
 
 
+namespace Dirac
+{
 
-unsigned int createShader(const std::string& shaderAddress, const SHADER_TYPE& shaderType){
 
-	std::string shader = readShader(shaderAddress);
-	const char* rawShader = shader.c_str();
+unsigned int getShaderID(const std::string tShaderAddress, ShaderType tType)
+{
+	unsigned int lID = glCreateShader((tType == ShaderType::VERTEX? GL_VERTEX_SHADER: GL_FRAGMENT_SHADER));
+	
+	// convert source to char
+	std::string lShaderString = Dirac::convertToString(tShaderAddress);
 
-	unsigned int shaderID = glCreateShader((shaderType == SHADER_TYPE::VERTEX? GL_VERTEX_SHADER: GL_FRAGMENT_SHADER));
-	glShaderSource(shaderID, 1, &rawShader, NULL);
-	glCompileShader(shaderID);
+	const char* lShaderChar = lShaderString.c_str();
 
-	if (Constants::VERBOSE){
-		/* error checking */
-		int roger;
-		char info[512];
+	glShaderSource(lID, 1, &lShaderChar, NULL);
+	glCompileShader(lID);
+
+	int lPassed;
+	glGetShaderiv(lID, GL_COMPILE_STATUS, &lPassed);
+
+	if (not lPassed)
+	{
+		char lErrorInfo[512];
+		glGetShaderInfoLog(lID, 512, NULL, lErrorInfo);
 		
-		glGetShaderiv(shaderID, GL_COMPILE_STATUS, &roger);
-		if (not roger){
-
-			glGetShaderInfoLog(shaderID, 512, NULL, info);
-			std::cout << "\t...troubles compiling " << (shaderType == SHADER_TYPE::VERTEX? "VERTEX": "FRAGMENT") << " shader ..." << std::endl;
-			std::cout << info << std::endl;
-		}
+		std::string lShaderType = (tType == ShaderType::VERTEX? "vertex ": "fragment ");
+		DIRAC_ASSERT(false, "Error in " + lShaderType + "shader!!" + "\n\t" + lErrorInfo);
 	}
 
-	return shaderID;
+	return lID; 
 }
 
 
 
-Shader::Shader(const std::string& vertexShaderAddress, const std::string& fragmentShaderAddress){
-	/* links the shaders into a program */
+Shader::Shader(const std::string& tVertexShaderAddress,
+	       const std::string& tFragmentShaderAddress)
+{
+	// create shaders
+	unsigned int lVertexID = getShaderID(tVertexShaderAddress, ShaderType::VERTEX);
+	unsigned int lFragmentID = getShaderID(tFragmentShaderAddress, ShaderType::FRAGMENT);
 
-	unsigned int vertexHandle = createShader(vertexShaderAddress, SHADER_TYPE::VERTEX);
-	unsigned int fragmentHandle = createShader(fragmentShaderAddress, SHADER_TYPE::FRAGMENT);
+	
+	// assemble program
+	mID = glCreateProgram();
 
-	id = glCreateProgram();
-	glAttachShader(id, vertexHandle);
-	glAttachShader(id, fragmentHandle);
-	glLinkProgram(id);
+	glAttachShader(mID,lVertexID);
+	glAttachShader(mID,lFragmentID);
+	glLinkProgram(mID);
+	
+	int lPassed;
+	glGetShaderiv(mID, GL_LINK_STATUS, &lPassed);
+	
+	DIRAC_ASSERT(lPassed, "Could not link shaders into a program!!");
+	
+	// delete shaders
+	glDeleteShader(lVertexID);
+	glDeleteShader(lFragmentID);
 
-	if (Constants::VERBOSE){
-		/* checks for errors in the linking process */
-		int roger;
-		char info[512];
-		glGetShaderiv(id, GL_LINK_STATUS, &roger);
-		if (not roger){
-			
-			glGetProgramInfoLog(id, 512, NULL, info);
-			std::cout << "\t...troubles in linking shaders to a program ..." << std::endl;
-			std::cout << info << std::endl;
-		}
+	// Register uniforms in the dictionary
+	Dirac::Words lVertexUniforms = findUniforms(tVertexShaderAddress);
+
+	for (auto lUniformName: lVertexUniforms)
+	{	
+		mUniformLocations[lUniformName] = glGetUniformLocation(mID, lUniformName.c_str());
 	}
 
-	glDeleteShader(vertexHandle);
-	glDeleteShader(fragmentHandle);
-
-	/* find the id for each uniform found in the shaders */
-	std::vector<std::string> vertexUniforms = getUniforms(vertexShaderAddress);
-	std::vector<std::string> fragmentUniforms = getUniforms(fragmentShaderAddress);
-
-	for (const std::string& uniform: vertexUniforms){
-		
-		uniformLocations[uniform] = glGetUniformLocation(id, uniform.c_str());
-	}
-	for (const std::string& uniform: fragmentUniforms){
-		
-		uniformLocations[uniform] = glGetUniformLocation(id, uniform.c_str());
-	}
 }
 
 
-Shader::~Shader(void){
-
-	glDeleteProgram(id);
+Shader::~Shader(void)
+{
+	glDeleteProgram(mID);
 }
 
-void Shader::bind(void) const{
 
-	glUseProgram(id);
+void Shader::bind(void)
+{
+	glUseProgram(mID);
 }
 
-void Shader::unbind(void) const{
 
+void Shader::unbind(void)
+{
 	glUseProgram(0);
 }
 
 
-void Shader::setUniform(const std::string& uniform, float newValue){
+void Shader::setUniform(const std::string& tUniform, float newValue){
 
-	glUniform1f(uniformLocations[uniform], newValue);
+	glUniform1f(mUniformLocations[tUniform], newValue);
 }
 
 
-void Shader::setUniform(const std::string& uniform, const Vector2& newValue){
+void Shader::setUniform(const std::string& tUniform, const Vector2& newValue){
 
-	newValue.getRaw(vectorBuffer);
+	newValue.getRaw(mVectorBuffer);
 
-	glUniform2fv(uniformLocations[uniform], 1, vectorBuffer);
+	glUniform2fv(mUniformLocations[tUniform], 1, mVectorBuffer);
+}
+
+void Shader::setUniform(const std::string& tUniform, const Vector& newValue){
+
+	newValue.getRaw(mVectorBuffer);
+
+	glUniform3fv(mUniformLocations[tUniform], 1, mVectorBuffer);
 }
 
 
-void Shader::setUniform(const std::string& uniform, const Vector& newValue){
+void Shader::setUniform(const std::string& tUniform, const Matrix& newValue){
 
-	newValue.getRaw(vectorBuffer);
+	newValue.getColumnMajorOrder(mMatrixBuffer);
 
-	glUniform3fv(uniformLocations[uniform], 1, vectorBuffer);
+	glUniformMatrix3fv(mUniformLocations[tUniform], 1, GL_FALSE, mMatrixBuffer);
 }
 
 
 
-void Shader::setUniform(const std::string& uniform, const Matrix& newValue){
-
-	newValue.getColumnMajorOrder(matrixBuffer);
-
-	glUniformMatrix3fv(uniformLocations[uniform], 1, GL_FALSE, matrixBuffer);
-}
-
-
-
-
-
+};
