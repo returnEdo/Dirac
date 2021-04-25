@@ -44,6 +44,7 @@ class Shader
 	void bind(void);
 	void unbind(void);
 
+	inline unsigned int getID(void)	{ return mID; }
 
 	void setUniform(const std::string& tUniform, float newValue);
 	void setUniform(const std::string& tUniform, const Vector2& newValue);

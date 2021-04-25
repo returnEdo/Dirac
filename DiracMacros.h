@@ -2,7 +2,8 @@
 
 #include <iostream>
 
-namespace Dirac{
+namespace Dirac
+{
 
 // PRINTING MACROS
 

@@ -124,10 +124,15 @@ void Renderer::update(void)
 	auto lCameraTransform = gManager.getComponent<Transform>(mCameraID);
 	auto lCameraView = gManager.getComponent<View>(mCameraID);
 
-	PRINT_AUTO(lCameraTransform.mPosition);
 	// camera transform uniforms
+	mShader -> setUniform("uCameraPosition", lCameraTransform.mPosition);
+	mShader -> setUniform("uCameraAttitude", lCameraTransform.mAttitude);
 
 	// camera view uniforms
+	mShader -> setUniform("uCameraDeltax", lCameraView.mDeltax);
+	mShader -> setUniform("uCameraDeltaz", lCameraView.mDeltaz);
+	mShader -> setUniform("uCameraNear", lCameraView.mNearPlane);
+	mShader -> setUniform("uCameraAspectRatio", lCameraView.mAspectRatio);
 
 
 	for (auto lEntity: mEntities)

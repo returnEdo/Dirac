@@ -3,51 +3,56 @@
 #include <iostream>
 #include <cassert>
 
+#include "DiracMacros.h"
 
-std::unordered_map<int, int> ScreenManager::keyState;
-Vector2 ScreenManager::mousePosition;
+namespace Dirac
+{
+
+std::unordered_map<int, int> ScreenManager::mKeyState;
+Vector2 ScreenManager::mMousePosition;
 
 
-ScreenManager::ScreenManager(int width_, int height_, const std::string& title):
-		width(width_),
-		height(height_) {
-	/* initialize glfw */
+ScreenManager::ScreenManager(int tWidth, int tHeight, const std::string& tTitle):
+		mWidth(tWidth),
+		mHeight(tHeight) {
+	// Create window
 
 	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+//	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+//	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+//	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 
-	window = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
-	if (window == NULL)
+	mWindow = glfwCreateWindow(mWidth, mHeight, tTitle.c_str(), NULL, NULL);
+	if (mWindow == NULL)
 	{
-		std::cout << "\t...troubles creating GLFW window ..." << std::endl;
 		glfwTerminate();
-		assert(false);
+		DIRAC_ASSERT(false, "Could not create GLFW window!!");
 	}
-	glfwMakeContextCurrent(window);
+	glfwMakeContextCurrent(mWindow);
 
-	/* initialize Opengl function pointers */
+	// Load opengl functions pointers
 	if (glewInit())
 	{
-		std::cout << "\t...troubles loading OpenGL function pointers..." << std::endl;
-		assert(false);
+		DIRAC_ASSERT(false, "Could not load OpenGL function pointers!!");
 	}
 
-	/* set callback functions */
-	glfwSetKeyCallback(window, ScreenManager::keyboardCallback);
-	glfwSetMouseButtonCallback(window, ScreenManager::mouseButtonsCallback);
-	glfwSetCursorPosCallback(window, ScreenManager::mousePositionCallback);
+	// Set callback functions
+	glfwSetKeyCallback(mWindow, ScreenManager::keyboardCallback);
+	glfwSetMouseButtonCallback(mWindow, ScreenManager::mouseButtonsCallback);
+	glfwSetCursorPosCallback(mWindow, ScreenManager::mousePositionCallback);
 
+	// Blending to allow for transparency
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 }
 
 
-ScreenManager::ScreenManager(const std::string& title):
+ScreenManager::ScreenManager(const std::string& tTitle):
 		ScreenManager(Constants::WINDOW_WIDTH,
 			Constants::WINDOW_HEIGHT,
-			title)	{}
+			tTitle)	{}
 
 
 ScreenManager::~ScreenManager(void){
@@ -57,9 +62,9 @@ ScreenManager::~ScreenManager(void){
 
 void ScreenManager::clear(void){
 
-	glClearColor(backGroundColor.x,
-		     backGroundColor.y,
-		     backGroundColor.z, 1.0f);
+	glClearColor(mBackgroundColor.x,
+		     mBackgroundColor.y,
+		     mBackgroundColor.z, 1.0f);
 	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
@@ -67,7 +72,7 @@ void ScreenManager::clear(void){
 
 void ScreenManager::update(void){
 
-	glfwSwapBuffers(window);
+	glfwSwapBuffers(mWindow);
 	glfwPollEvents();
 }
 
@@ -75,19 +80,22 @@ void ScreenManager::update(void){
 
 void ScreenManager::keyboardCallback(GLFWwindow* win, int key, int scancode, int action, int mode){
 
-	ScreenManager::keyState[key] = action;
+	ScreenManager::mKeyState[key] = action;
 }
 
 
 
 void ScreenManager::mousePositionCallback(GLFWwindow* win, double xpos, double ypos){
 
-	ScreenManager::mousePosition.x = static_cast<float>(xpos);
-	ScreenManager::mousePosition.y = static_cast<float>(ypos);
+	ScreenManager::mMousePosition.x = static_cast<float>(xpos);
+	ScreenManager::mMousePosition.y = static_cast<float>(ypos);
 }
 
 
 void ScreenManager::mouseButtonsCallback(GLFWwindow* win, int button, int action, int mode){
 
-	ScreenManager::keyState[button] = action;
+	ScreenManager::mKeyState[button] = action;
 }
+
+
+};

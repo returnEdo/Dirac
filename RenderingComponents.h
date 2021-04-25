@@ -5,6 +5,7 @@
 
 #include "DiracConstants.h"
 #include "Vector.h"
+#include "Vector2.h"
 #include "Matrix.h"
 
 namespace Dirac
@@ -38,6 +39,16 @@ struct View
 	float mDeltaz		= Constants::DELTAZ;
 	float mAspectRatio	= Constants::ASPECT_RATIO;
 	float mNearPlane	= Constants::NEAR_PLANE;
+};
+
+
+struct Texture
+{	
+	// Texture coordinates of the quad
+	Vector2 mBottomLeft;
+
+	float mWidth;		// e.g.: 32 bit
+	float mHeight;
 };
 
 
