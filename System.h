@@ -20,9 +20,9 @@ class ISystem
 {
 	protected:
 
-	std::set<EntityID> mEntities;
+	std::set<EntityID> mEntities {};
 
-	Signature mSignature;
+	Signature mSignature {};
 	
 	friend class SystemManager;
 };

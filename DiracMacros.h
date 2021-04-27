@@ -1,5 +1,6 @@
 #pragma once
 
+#include <GL/glew.h>
 #include <iostream>
 
 namespace Dirac
@@ -79,4 +80,5 @@ namespace Dirac
 
 // DEBUG
 #define DBG PRINT("\t@ line:\t" << __LINE__)
+
 };

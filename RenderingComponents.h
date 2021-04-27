@@ -52,4 +52,11 @@ struct Texture
 };
 
 
+struct Line
+{
+	Vector mVertexA;
+	Vector mVertexB;
+};
+
+
 };

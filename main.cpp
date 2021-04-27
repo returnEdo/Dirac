@@ -1,5 +1,5 @@
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
+//#include <GL/glew.h>
+//#include <GLFW/glfw3.h>
 #include <iostream>
 #include <memory>
 #include <algorithm>
@@ -8,14 +8,10 @@
 #include "ScreenManager.h"
 #include "Shader.h"
 #include "Manager.h"
-#include "Renderer.h"
-#include "TextureRenderer.h"
+#include "MeshRenderer.h"
 #include "RenderingComponents.h"
 #include "Entity.h"
 
-#include "Vector.h"
-#include "Vector2.h"
-#include "Matrix.h"
 
 Dirac::Manager gManager;
 
@@ -32,79 +28,100 @@ int main()
 	// get componenents ids
 	unsigned int transformID = gManager.getComponentID<Transform>();
 	unsigned int colorID = gManager.getComponentID<Color>();
-	unsigned int textureID = gManager.getComponentID<Texture>();
 	unsigned int viewID = gManager.getComponentID<View>();
 	
 	// set system signature
 	Dirac::Signature rendererSignature;
 	rendererSignature.set(transformID, true);
 	rendererSignature.set(colorID, true);
-
-	Dirac::Signature textureRendererSignature;
-	textureRendererSignature.set(transformID, true);
-	textureRendererSignature.set(textureID, true);
 	
 	// create system
-	gManager.setSignature<Renderer>(rendererSignature);
-	std::shared_ptr<Renderer> pRenderer = gManager.getSystem<Renderer>();
-
-	gManager.setSignature<TextureRenderer>(textureRendererSignature);
-	std::shared_ptr<TextureRenderer> pTextureRenderer = gManager.getSystem<TextureRenderer>();
+	gManager.setSignature<MeshRenderer>(rendererSignature);
+	std::shared_ptr<MeshRenderer> pMeshRenderer = gManager.getSystem<MeshRenderer>();
 
 	// Initialize buffers
-	pRenderer -> init();
-	pTextureRenderer -> init("./resources/assets/textures/asteroid.png");
+	pMeshRenderer -> MeshRenderer::init();
 
 	// Create entities and add components
+	EntityID id1 = gManager.createEntity();
+	
+	gManager.addComponent<Transform>(id1,
+					 {
+						 Vector(),
+						 Matrix(Vector(1.0f, .0f, .0f), .0f),
+						 Matrix(Vector(1.0f))
+					 });
 
+	gManager.addComponent<Color>(id1,
+				     {
+					     Vector(.3f, .7f, .3f),
+					     1.0f
+				     });
+	
 	EntityID id2 = gManager.createEntity();
 	
 	gManager.addComponent<Transform>(id2,
 					 {
-						 Vector(2.0f, .0f, 2.0f),
-						 Matrix(Vector(0.0f, 1.0f, .0f), .0f),
+						 Vector(),
+						 Matrix(Vector(0.0f, 1.0f, .0f), M_PI_4),
 						 Matrix(Vector(3.0f))
 					 });
 
-	gManager.addComponent<Texture>(id2,
+	gManager.addComponent<Color>(id2,
 				     {
-					     Vector2(64.0f, .0f),
-
-					     32.0f,
-					     32.0f
+					     Vector(.7f, .3f, .3f),
+					     1.0f
 				     });
+	// Camera
+	EntityID cameraID = gManager.createEntity();
+	gManager.addComponent<Transform>(cameraID,
+					 {	
+						Vector(.0f, .0f, 5.0f),
+						Matrix(Vector(.0f, 1.0f, .0f), .0f),
+						Matrix()
+					 });
+	gManager.addComponent<View>(cameraID, {});
+
+
 	
-	Transform& camera	= gManager.getComponent<Transform>(pRenderer -> mCameraID);
+	// Get compoenent references to play with
+	Color& color 		= gManager.getComponent<Color>(id2);
+	Transform& transform 	= gManager.getComponent<Transform>(id1);
+	Transform& camera	= gManager.getComponent<Transform>(cameraID);
 
-	camera.mPosition.y = 1.0f;
-	camera.mAttitude = Matrix(Vector(1.0f, .0f, .0f), -.5f);
+	camera.mPosition.y = .8f;
+	camera.mAttitude = Matrix(Vector(1.0f, .0f, .0f), -.3f);
 
-
-	Transform& spriteTransform = gManager.getComponent<Transform>(id2);
-
-	spriteTransform.mShear *= .5f;
-
+	float dt = .05f;
 	float t = .0f;
-	float dt = .005f;
 	while (screenManager.shouldRun())
 	{
 
-		spriteTransform.mAttitude = Matrix(Vector(.0f, .0f, 1.0f), t);
-		spriteTransform.mPosition = Vector(1.3f * cos(.33f * t), .0f, 1.3f * sin(.33f * t));
-		t += dt;
-
 		screenManager.clear();
 
-		//pRenderer -> update();
-		pTextureRenderer -> update(pRenderer -> mCameraID);
+		transform.mAttitude = Matrix(Vector(.0f, .0f, 1.0f), t);
 
+		t += dt;
+
+
+		pMeshRenderer -> MeshRenderer::update(cameraID);
 		screenManager.update();
 
 		if (screenManager.isPressed(GLFW_KEY_ESCAPE))
 		{
 			screenManager.shouldDie();
 		}
+		if (screenManager.isPressedOrHeld(GLFW_KEY_UP))
+		{
+			color.mAlpha += .005f;
+		}
+		if (screenManager.isPressedOrHeld(GLFW_KEY_DOWN))
+		{
+			color.mAlpha -= .005f; 
+		}
 	}
+
+	pMeshRenderer -> MeshRenderer::destroy();
 
 	return 0;
 }

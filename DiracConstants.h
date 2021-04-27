@@ -25,4 +25,5 @@ namespace Constants{
 
 	/* batch line */
 	const unsigned int 	MAX_ISTANCES		= 100;
+	constexpr unsigned int 	MAX_LINES 		= 200;
 };

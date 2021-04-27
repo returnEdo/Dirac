@@ -25,38 +25,6 @@ class Manager
 
 	public:
 
-//	void init(void);
-//
-//	// Entity life operations
-//	EntityID createEntity(void);
-//	void removeEntity(EntityID tID);
-//
-//	// Entity components operations
-//	template <typename ComponentType>
-//	void addComponent(EntityID tID, ComponentType tComponent);
-//
-//	template <typename ComponentType>
-//	void removeComponent(EntityID tID);
-//
-//	// Component operations
-//	template <typename ComponentType>
-//	ComponentType& getComponent(EntityID tID);
-//
-//	template <typename ComponentType>
-//	unsigned int getComponentID(void);
-//
-//	template <typename ComponentType>
-//	void setComponent(EntityID tID, ComponentType& tComponent);
-//
-//	// System operations
-//	template <typename SystemType>
-//	void setSignature(Signature& tSignature);
-//
-//	template <typename SystemType>
-//	std::shared_ptr<SystemType> getSystem(void);
-//};
-//
-//
 	void init(void)
 	{
 		mEntityManager 		= std::make_unique<EntityManager>();

@@ -4,7 +4,9 @@
 
 #include "Entity.h"
 #include "System.h"
+#include "IRenderer.h"
 #include "Shader.h"
+#include "DiracMacros.h"
 
 
 namespace Dirac
@@ -27,29 +29,24 @@ SIGNATURE:
 -Texture
 */
 
-class TextureRenderer: public ISystem
+class TextureRenderer: public ISystem, public IRenderer
 {
 	private:
 	
-	// OpenGL id
-	unsigned int mVertexArrayID { };
-	unsigned int mVertexBufferID { };
-	unsigned int mIndexBufferID { };
 	unsigned int mTextureID { };
 
 	// Texture attributes
 	int mTextureWidth { };
 	int mTextureHeight { };
 	int mTextureChannels { };
-
-	Shader* mShader;
-
+	
 	public:
 
-	~TextureRenderer(void);
-
 	void init(const std::string& tTextureAtlasAddress);
-	void update(EntityID tCameraID);
+
+	virtual void init(void) override { DIRAC_ASSERT(false, "Not avalilable for texture rendering!!"); }
+	virtual void update(EntityID tCameraID) override;
+	virtual void destroy(void) override;
 };
 
 

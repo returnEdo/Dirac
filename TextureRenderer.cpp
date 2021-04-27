@@ -4,11 +4,9 @@
 #include "stb_image.h"
 
 #include "DiracConstants.h"
-#include "DiracMacros.h"
 #include "RenderingComponents.h"
 #include "Manager.h"
 
-#include "DiracMacros.h"
 
 extern Dirac::Manager gManager;
 
@@ -36,15 +34,6 @@ namespace TextureRawBuffers
 	};
 };
 
-
-TextureRenderer::~TextureRenderer(void)
-{
-	delete mShader;
-
-	glDeleteBuffers(1, &mVertexBufferID);
-	glDeleteBuffers(1, &mIndexBufferID);
-	glDeleteVertexArrays(1, &mVertexArrayID);
-}
 
 void TextureRenderer::init(const std::string& tTextureAtlasAddress)
 {
@@ -177,6 +166,16 @@ void TextureRenderer::update(EntityID tCameraID)
 			       GL_UNSIGNED_INT,
 			       0);
 	}
+}
+
+
+void TextureRenderer::destroy(void)
+{
+	delete mShader;
+
+	glDeleteBuffers(1, &mVertexBufferID);
+	glDeleteBuffers(1, &mIndexBufferID);
+	glDeleteVertexArrays(1, &mVertexArrayID);
 }
 
 
