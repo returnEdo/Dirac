@@ -17,7 +17,13 @@ Matrix::Matrix(const Vector& diag):
 	row1(Vector(diag.x, .0, .0)), row2(Vector(.0, diag.y, .0)), row3(Vector(.0, .0, diag.z))
 	{this -> buildCol();}
 
-Matrix::Matrix(const Vector& n, float t){
+Matrix::Matrix(const Vector& nn, float t, bool tNormalize){
+	
+	Vector n { nn };
+	if (tNormalize)
+	{
+		n.normalize();
+	}
 
 	row1 = Vector(cos(t) + (1 - cos(t)) * n.x * n.x, -sin(t) * n.z + (1 - cos(t)) * n.x * n.z, sin(t) * n.y + (1 - cos(t)) * n.x * n.z);
 	row2 = Vector(sin(t) * n.z + (1 - cos(t)) * n.x * n.z, cos(t) + (1 - cos(t)) * n.y * n.y, -sin(t) * n.x + (1 - cos(t)) * n.y * n.z);

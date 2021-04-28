@@ -18,7 +18,7 @@ class Matrix{
 	
 	Matrix(const Vector& r1, const Vector& r2, const Vector& r3);
 	Matrix(const Matrix& other);
-	Matrix(const Vector& axis, float theta);
+	Matrix(const Vector& axis, float theta, bool tNormalize = false);
 	Matrix(const Vector& diag);
 	Matrix(void);
 

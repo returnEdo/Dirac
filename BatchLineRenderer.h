@@ -3,28 +3,26 @@
 #include "Entity.h"
 #include "System.h"
 #include "IRenderer.h"
-#include "Shader.h"
+#include "RenderingComponents.h"
 
 
 namespace Dirac
 {
 
-struct ExtremumLayout
-{
-	float mPosition[3];
-};
 
-class LineRenderer: public ISystem, public IRenderer
+class BatchLineRenderer: public ISystem, public IRenderer
 {
 	private:
-
-	float mVertices[6];
+	
+	float mLineWidth = 1.0f;
 
 	public:
 
 	virtual void init(void) override;
 	virtual void update(EntityID tCameraID) override;
 	virtual void destroy(void) override;
+
+	inline void setLineWidth(float tLineWidth) 	{ mLineWidth = tLineWidth; } 
 };
 
 

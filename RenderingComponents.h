@@ -8,8 +8,24 @@
 #include "Vector2.h"
 #include "Matrix.h"
 
+
+
 namespace Dirac
 {
+
+
+struct Vertex
+{
+	Vector mPosition;
+	Vector mNormal;
+	Vector mColor;
+};
+
+struct LineVertex
+{	
+	Vector mPosition;
+	Vector mColor;
+};
 
 
 struct VertexDataLayout
@@ -54,8 +70,14 @@ struct Texture
 
 struct Line
 {
-	Vector mVertexA;
-	Vector mVertexB;
+	LineVertex mVertexA;
+	LineVertex mVertexB;
+};
+
+
+struct Model
+{
+	std::vector<Vertex>* mPVertices;
 };
 
 

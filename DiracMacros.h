@@ -3,9 +3,6 @@
 #include <GL/glew.h>
 #include <iostream>
 
-namespace Dirac
-{
-
 // PRINTING MACROS
 
 // base print
@@ -81,4 +78,5 @@ namespace Dirac
 // DEBUG
 #define DBG PRINT("\t@ line:\t" << __LINE__)
 
-};
+// ARRAY
+#define DIRAC_COUNT(x, tType)	sizeof(x) / sizeof(tType)

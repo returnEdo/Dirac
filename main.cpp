@@ -8,8 +8,7 @@
 #include "ScreenManager.h"
 #include "Shader.h"
 #include "Manager.h"
-#include "MeshRenderer.h"
-#include "TextureRenderer.h"
+#include "BatchLineRenderer.h"
 #include "RenderingComponents.h"
 #include "Entity.h"
 
@@ -34,38 +33,30 @@ int main()
 	unsigned int colorID = gManager.getComponentID<Color>();
 	unsigned int textureID = gManager.getComponentID<Texture>();
 	unsigned int viewID = gManager.getComponentID<View>();
+	unsigned int lineID = gManager.getComponentID<Line>();
 	
 	// set system signature
-	Dirac::Signature textureRendererSignature;
-	textureRendererSignature.set(transformID, true);
-	textureRendererSignature.set(textureID, true);
+	Signature signature;
+
+	signature.set(lineID, true);
 	
-	gManager.setSignature<TextureRenderer>(textureRendererSignature);
-	std::shared_ptr<TextureRenderer> pTextureRenderer = gManager.getSystem<TextureRenderer>();
+	gManager.setSignature<BatchLineRenderer>(signature);
+	std::shared_ptr<BatchLineRenderer> pBatchLineRenderer = gManager.getSystem<BatchLineRenderer>();
+
 
 	// Initialize buffers
-	pTextureRenderer -> init("./resources/assets/textures/asteroid.png");
+	pBatchLineRenderer -> BatchLineRenderer::init();
 
 	// Create entities and add components
 
-	EntityID id2 = gManager.createEntity();
+	EntityID id1 = gManager.createEntity();
 	
-	gManager.addComponent<Transform>(id2,
+	gManager.addComponent<Line>(id1,
 					 {
-						 Vector(2.0f, .0f, 2.0f),
-						 Matrix(Vector(0.0f, 1.0f, .0f), .0f),
-						 Matrix(Vector(3.0f))
+						 {Vector(), Vector(.3f, .7f, .3f)},
+						 {Vector(), Vector(.7f, .3f, .3f)}
 					 });
-
-	gManager.addComponent<Texture>(id2,
-				     {
-					     Vector2(32.0f, .0f),
-
-					     32.0f,
-					     32.0f
-				     });
 	
-
 	// Camera
 	EntityID cameraID = gManager.createEntity();
 	gManager.addComponent<Transform>(cameraID,
@@ -75,35 +66,30 @@ int main()
 						Matrix()
 					 });
 	gManager.addComponent<View>(cameraID, {});
+
+
+	auto& line = gManager.getComponent<Line>(id1);
+
 	Transform& camera	= gManager.getComponent<Transform>(cameraID);
 
-	Texture& texture = gManager.getComponent<Texture>(id2);
+	camera.mPosition = Vector(0.0f, .0f, 4.0f);
+	camera.mAttitude = Matrix(Vector(.0f, 1.0f, .0f), .0f);
+	
+	float t = .0f, dt = .1f;
 
-	camera.mPosition = Vector(4.0f, .0f, 4.0f);
-	camera.mAttitude = Matrix(Vector(.0f, 1.0f, .0f), M_PI_4 * .0f);
+	pBatchLineRenderer -> setLineWidth(5.0f);
 
-
-	Transform& spriteTransform = gManager.getComponent<Transform>(id2);
-
-	spriteTransform.mShear *= .5f;
-
-	int i = 0;
-
-	float t = .0f;
-	float dt = .005f;
 	while (screenManager.shouldRun())
 	{
-
-		spriteTransform.mAttitude = Matrix(Vector(.0f, .0f, 1.0f), t);
-		spriteTransform.mPosition = Vector(1.3f * cos(.33f * t), .0f, 1.3f * sin(.33f * t));
 		
-		texture.mBottomLeft = Vector2(32.0f * i, .0f);
+		line.mVertexA.mPosition.x = 2.0f * cos(t);
+		line.mVertexA.mPosition.y = 2.0f * sin(t);
 
 		t += dt;
 
 		screenManager.clear();
 
-		pTextureRenderer -> TextureRenderer::update(cameraID);
+		pBatchLineRenderer -> BatchLineRenderer::update(cameraID);
 
 		screenManager.update();
 
@@ -113,7 +99,7 @@ int main()
 		}
 	}
 
-	pTextureRenderer -> TextureRenderer::destroy();
+	pBatchLineRenderer -> BatchLineRenderer::destroy();
 
 	return 0;
 }
