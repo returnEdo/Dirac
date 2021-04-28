@@ -60,25 +60,9 @@ void TextureRenderer::init(const std::string& tTextureAtlasAddress)
 
 	
 	// Specifies data layout
-	// Vertex position
-	glVertexAttribPointer(0, sizeof(TextureDataLayout::mVertexPosition) / sizeof(float),
-			      GL_FLOAT, GL_FALSE, sizeof(TextureDataLayout),
-			      (void*)0);
-	glEnableVertexAttribArray(0);
-	
-	// Vertex normal
-	glVertexAttribPointer(1, sizeof(TextureDataLayout::mVertexNormal) / sizeof(float),
-			      GL_FLOAT, GL_FALSE, sizeof(TextureDataLayout),
-			      (void*)(sizeof(TextureDataLayout::mVertexPosition)));
-	glEnableVertexAttribArray(1);
-	
-	// Vertex texture coordinate
-	glVertexAttribPointer(2, sizeof(TextureDataLayout::mVertexUV) / sizeof(float),
-			      GL_FLOAT, GL_FALSE, sizeof(TextureDataLayout),
-			      (void*)(sizeof(TextureDataLayout::mVertexPosition) + sizeof(TextureDataLayout::mVertexNormal)));
-	glEnableVertexAttribArray(2);
-
-
+	enableAttributes({{3, GL_FLOAT, GL_FALSE, 0},		// Position
+			  {3, GL_FLOAT, GL_FALSE, 0},		// Normal
+			  {2, GL_FLOAT, GL_FALSE, 0}});		// UV coordinates
 
 	// Texture atlas
 	glGenTextures(1, &mTextureID);

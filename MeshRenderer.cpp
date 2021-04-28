@@ -73,8 +73,8 @@ namespace Meshes
 void MeshRenderer::init(void)
 {	
 	// Shader
-	mShader = new Shader("resources/shaders/bareboneVertexShader.shader",
-			     "resources/shaders/bareboneFragmentShader.shader");
+	mShader = new Shader("resources/shaders/meshVertex.shader",
+			     "resources/shaders/meshFragment.shader");
 		
 	// Vertex array and vertex buffer
 	// 1) Generation & binding
@@ -85,18 +85,6 @@ void MeshRenderer::init(void)
 
 	// 2) Data + data format
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Meshes::lCubeMesh), Meshes::lCubeMesh, GL_STATIC_DRAW);
-
-	//glVertexAttribPointer(0, sizeof(VertexDataLayout::mPosition) / sizeof(float),
-	//		      GL_FLOAT, GL_FALSE,
-	//		      sizeof(VertexDataLayout),
-	//		      (void*)0);
-	//glEnableVertexAttribArray(0);
-	//
-	//glVertexAttribPointer(1, sizeof(VertexDataLayout::mNormal) / sizeof(float),
-	//		      GL_FLOAT, GL_FALSE,
-	//		      sizeof(VertexDataLayout),
-	//		      (void*)(sizeof(VertexDataLayout::mPosition)));
-	//glEnableVertexAttribArray(1);
 
 	Dirac::enableAttributes({{3, GL_FLOAT, GL_FALSE},
 				 {3, GL_FLOAT, GL_FALSE}});
