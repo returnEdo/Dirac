@@ -14,6 +14,7 @@ namespace Dirac
 {
 
 
+// Vertex data layout
 struct Vertex
 {
 	Vector mPosition;
@@ -27,13 +28,14 @@ struct LineVertex
 	Vector mColor;
 };
 
-
-struct VertexDataLayout
+struct TextureVertex
 {
-	float mPosition[3];
-	float mNormal[3];
+	Vector mPosition;
+	Vector2 mTextureUV;
 };
 
+
+// Components
 struct Transform
 {
 	Vector 	mPosition;

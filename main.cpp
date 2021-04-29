@@ -1,6 +1,7 @@
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
+//#include <GL/glew.h>
+//#include <GLFW/glfw3.h>
 #include <iostream>
+#include <vector>
 #include <memory>
 #include <algorithm>
 #include <cmath>
@@ -8,13 +9,10 @@
 #include "ScreenManager.h"
 #include "Shader.h"
 #include "Manager.h"
-#include "BatchLineRenderer.h"
+#include "DynamicBatchRenderer.h"
 #include "RenderingComponents.h"
 #include "Entity.h"
 
-#include "Vector.h"
-#include "Vector2.h"
-#include "Matrix.h"
 
 Dirac::Manager gManager;
 
@@ -24,39 +22,85 @@ using namespace Dirac;
 int main()
 {
 
+	std::vector<Vertex> quadVertices =
+	{
+		{Vector(-.5f, -.5f, .0f), Vector(.0f, .0f, 1.0f), Vector(.2f, .5f, .2f)},
+		{Vector(.5f, -.5f, .0f), Vector(.0f, .0f, 1.0f), Vector(.2f, .5f, .2f)},
+		{Vector(.5f, .5f, .0f), Vector(.0f, .0f, 1.0f), Vector(.2f, .5f, .2f)},
+		{Vector(-.5f, -.5f, .0f), Vector(.0f, .0f, 1.0f), Vector(.2f, .5f, .2f)},
+		{Vector(.5f, .5f, .0f), Vector(.0f, .0f, 1.0f), Vector(.2f, .5f, .2f)},
+		{Vector(-.5f, .5f, .0f), Vector(.0f, .0f, 1.0f), Vector(.2f, .5f, .2f)},
+	};
+
+
+
 	Dirac::ScreenManager screenManager("Dirac Demo");
 
 	gManager.init();
 
 	// get componenents ids
-	unsigned int transformID = gManager.getComponentID<Transform>();
-	unsigned int colorID = gManager.getComponentID<Color>();
-	unsigned int textureID = gManager.getComponentID<Texture>();
-	unsigned int viewID = gManager.getComponentID<View>();
-	unsigned int lineID = gManager.getComponentID<Line>();
+	unsigned int transformID	= gManager.getComponentID<Transform>();
+	unsigned int colorID 		= gManager.getComponentID<Color>();
+	unsigned int viewID 		= gManager.getComponentID<View>();
+	unsigned int modelID 		= gManager.getComponentID<Model>();
 	
 	// set system signature
-	Signature signature;
-
-	signature.set(lineID, true);
+	Dirac::Signature rendererSignature;
+	rendererSignature.set(transformID, true);
+	rendererSignature.set(colorID, true);
+	rendererSignature.set(modelID, true);
 	
-	gManager.setSignature<BatchLineRenderer>(signature);
-	std::shared_ptr<BatchLineRenderer> pBatchLineRenderer = gManager.getSystem<BatchLineRenderer>();
-
+	// create system
+	gManager.setSignature<DynamicBatchRenderer>(rendererSignature);
+	std::shared_ptr<DynamicBatchRenderer> pBatchRenderer = gManager.getSystem<DynamicBatchRenderer>();
 
 	// Initialize buffers
-	pBatchLineRenderer -> BatchLineRenderer::init();
+	pBatchRenderer -> DynamicBatchRenderer::init();
 
 	// Create entities and add components
-
 	EntityID id1 = gManager.createEntity();
 	
-	gManager.addComponent<Line>(id1,
+	gManager.addComponent<Transform>(id1,
 					 {
-						 {Vector(), Vector(.3f, .7f, .3f)},
-						 {Vector(), Vector(.7f, .3f, .3f)}
+						 Vector(),
+						 Matrix(Vector(1.0f, .0f, .0f), .0f),
+						 Matrix(Vector(1.0f))
 					 });
+
+	gManager.addComponent<Color>(id1,
+				     {
+					     Vector(.3f, .7f, .3f),
+					     1.0f
+				     });
+
+	gManager.addComponent<Model>(id1,
+				     {
+					     &quadVertices
+				     });
+
+	// Create entities and add components
+	EntityID id2 = gManager.createEntity();
 	
+	gManager.addComponent<Transform>(id2,
+					 {
+						 Vector(2.0f, 2.0f, .0f),
+						 Matrix(Vector(1.0f, .0f, .0f), .0f),
+						 Matrix(Vector(1.0f))
+					 });
+
+	gManager.addComponent<Color>(id2,
+				     {
+					     Vector(.3f, .3f, .7f),
+					     1.0f
+				     });
+
+	gManager.addComponent<Model>(id2,
+				     {
+					     &quadVertices
+				     });
+	
+	gManager.removeEntity(id2);
+
 	// Camera
 	EntityID cameraID = gManager.createEntity();
 	gManager.addComponent<Transform>(cameraID,
@@ -68,29 +112,28 @@ int main()
 	gManager.addComponent<View>(cameraID, {});
 
 
-	auto& line = gManager.getComponent<Line>(id1);
-
+	
+	// Get compoenent references to play with
+	Transform& transform 	= gManager.getComponent<Transform>(id1);
 	Transform& camera	= gManager.getComponent<Transform>(cameraID);
 
-	camera.mPosition = Vector(0.0f, .0f, 4.0f);
-	camera.mAttitude = Matrix(Vector(.0f, 1.0f, .0f), .0f);
-	
-	float t = .0f, dt = .1f;
+	camera.mPosition.y = .8f;
+	camera.mAttitude = Matrix(Vector(1.0f, .0f, .0f), -.3f);
 
-	pBatchLineRenderer -> setLineWidth(5.0f);
+	float t = 0.0f;
+	float dt = 0.03f;
 
 	while (screenManager.shouldRun())
 	{
-		
-		line.mVertexA.mPosition.x = 2.0f * cos(t);
-		line.mVertexA.mPosition.y = 2.0f * sin(t);
 
+	//	transform.mShear	= Matrix(Vector(1.0f + .3f *sin(t), 1.0f, 1.0f));
+		transform.mAttitude	= Matrix(Vector(1.0f, .0f, .0f), t);
+	
 		t += dt;
 
 		screenManager.clear();
 
-		pBatchLineRenderer -> BatchLineRenderer::update(cameraID);
-
+		pBatchRenderer -> DynamicBatchRenderer::update(cameraID);
 		screenManager.update();
 
 		if (screenManager.isPressed(GLFW_KEY_ESCAPE))
@@ -99,7 +142,7 @@ int main()
 		}
 	}
 
-	pBatchLineRenderer -> BatchLineRenderer::destroy();
+	pBatchRenderer -> DynamicBatchRenderer::destroy();
 
 	return 0;
 }

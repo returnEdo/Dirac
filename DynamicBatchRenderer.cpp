@@ -16,62 +16,48 @@ namespace Dirac
 {
 
 
+namespace Models
+{
+
+namespace VertexAttributes
+{
+	Graphics::Attribute nDynamicBatchPosition {DIRAC_COUNT(Vertex::mPosition, float), GL_FLOAT, sizeof(Vertex), offsetof(Vertex, mPosition)};
+	Graphics::Attribute nDynamicBatchNormal   {DIRAC_COUNT(Vertex::mNormal, float), GL_FLOAT, sizeof(Vertex), offsetof(Vertex, mNormal)};
+	Graphics::Attribute nDynamicBatchColor 	  {DIRAC_COUNT(Vertex::mColor, float), GL_FLOAT, sizeof(Vertex), offsetof(Vertex, mColor)};
+
+};
+
+};
+
+
 void DynamicBatchRenderer::init(void)
 {
 	// Shader
-	mShader = new Shader("./resources/shaders/batchVertex.shader",
-			     "./resources/shaders/batchFragment.shader");
+	mShader = new Graphics::Shader("./resources/shaders/batchVertex.shader",
+			  	       "./resources/shaders/batchFragment.shader");
 	
-	// Generate and bind buffers
-	glGenVertexArrays(1, &mVertexArrayID);
-	glBindVertexArray(mVertexArrayID);
-	glGenBuffers(1, &mVertexBufferID);
-	glBindBuffer(GL_ARRAY_BUFFER, mVertexBufferID);
+	mVertexArray 	= new Graphics::VertexArray();
+	mVertexBuffer	= new Graphics::Buffer(GL_ARRAY_BUFFER);
 
-	// Allocate space in the GPU
-	glBufferData(GL_ARRAY_BUFFER,
-		     Constants::MAX_VERTICES_BATCH * sizeof(Vertex),
-		     nullptr,
-		     GL_DYNAMIC_DRAW);
+	mVertexBuffer -> allocate(Constants::MAX_VERTICES_BATCH * sizeof(Vertex));
 
 	// Specify data layout
-	glVertexAttribPointer(0,
-			      DIRAC_COUNT(Vertex::mPosition, float),
-			      GL_FLOAT,
-			      GL_FALSE,
-			      sizeof(Vertex),
-			      (void*)(offsetof(Vertex, mPosition)));
-	glEnableVertexAttribArray(0);
-
-	glVertexAttribPointer(1,
-			      DIRAC_COUNT(Vertex::mNormal, float),
-			      GL_FLOAT,
-			      GL_FALSE,
-			      sizeof(Vertex),
-			      (void*)(offsetof(Vertex, mNormal)));
-	glEnableVertexAttribArray(1);
-
-
-	glVertexAttribPointer(2,
-			      DIRAC_COUNT(Vertex::mColor, float),
-			      GL_FLOAT,
-			      GL_FALSE,
-			      sizeof(Vertex),
-			      (void*)(offsetof(Vertex, mColor)));
-	glEnableVertexAttribArray(2);
+	mVertexArray -> addAttribute(Models::VertexAttributes::nDynamicBatchPosition);
+	mVertexArray -> addAttribute(Models::VertexAttributes::nDynamicBatchNormal);
+	mVertexArray -> addAttribute(Models::VertexAttributes::nDynamicBatchColor);
 
 	// Unbinding
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	mVertexBuffer 	-> bind(false);
+	mVertexArray 	-> bind(false);
 }
 
 
 void DynamicBatchRenderer::update(EntityID tCameraID)
 {
 	// update uniform + draw call
-	mShader -> bind();
-	glBindVertexArray(mVertexArrayID);
-	glBindBuffer(GL_ARRAY_BUFFER, mVertexBufferID);
+	mShader 	-> bind();
+	mVertexBuffer 	-> bind();
+	mVertexArray 	-> bind();
 
 	auto lCameraTransform 	= gManager.getComponent<Transform>(tCameraID);
 	auto lCameraView 	= gManager.getComponent<View>(tCameraID);
@@ -82,8 +68,7 @@ void DynamicBatchRenderer::update(EntityID tCameraID)
 	mShader -> setUniform("uCameraNear", 		lCameraView.mNearPlane);
 	mShader -> setUniform("uCameraAspectRatio", 	lCameraView.mAspectRatio);
 
-
-	Vertex* lMapBuffer = (Vertex*)(glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY));
+	Vertex* lMapBuffer = mVertexBuffer -> getBuffer<Vertex>();
 
 	Vertex lVertex;
 
@@ -113,7 +98,7 @@ void DynamicBatchRenderer::update(EntityID tCameraID)
 	}
 
 
-	glUnmapBuffer(GL_ARRAY_BUFFER);
+	mVertexBuffer -> unmapBuffer();
 	glDrawArrays(GL_TRIANGLES, 0, sizeof(Vertex) * lCurrentVertex);
 
 }
@@ -121,9 +106,8 @@ void DynamicBatchRenderer::update(EntityID tCameraID)
 
 void DynamicBatchRenderer::destroy(void)
 {
-	glDeleteBuffers(1, &mVertexBufferID);
-	glDeleteVertexArrays(1, &mVertexArrayID);
-
+	delete mVertexBuffer;
+	delete mVertexArray;
 	delete mShader;
 }
 

@@ -17,70 +17,57 @@ namespace Dirac
 {
 
 
+namespace Models
+{
+
+namespace VertexAttributes
+{
+	
+	Graphics::Attribute nLinePosition {DIRAC_COUNT(LineVertex::mPosition, float), GL_FLOAT, sizeof(LineVertex), offsetof(LineVertex, mPosition)};
+	Graphics::Attribute nLineColor	  {DIRAC_COUNT(LineVertex::mColor, float),    GL_FLOAT, sizeof(LineVertex), offsetof(LineVertex, mColor)};
+};
+
+
+};
+
 
 void BatchLineRenderer::init(void)
 {
 	
-	// Compile shader
-	mShader = new Shader("./resources/shaders/lineVertex.shader",
-			     "./resources/shaders/lineFragment.shader");
+	mShader = new Graphics::Shader("./resources/shaders/lineVertex.shader",
+			     	       "./resources/shaders/lineFragment.shader");
 
-	// Generate and bind buffers
-	glGenVertexArrays(1, &mVertexArrayID);
-	glBindVertexArray(mVertexArrayID);
-	glGenBuffers(1, &mVertexBufferID);
-	glBindBuffer(GL_ARRAY_BUFFER, mVertexBufferID);
+	mVertexArray 	= new Graphics::VertexArray();
+	mVertexBuffer 	= new Graphics::Buffer(GL_ARRAY_BUFFER);
 	
-	// Fill with data
+	mVertexBuffer -> allocate(sizeof(LineVertex) * Constants::MAX_VERTICES_BATCH);
 
-	glBufferData(GL_ARRAY_BUFFER,
-		     sizeof(LineVertex) * Constants::MAX_VERTICES_BATCH,
-		     nullptr,
-		     GL_DYNAMIC_DRAW);
-
-	// Data layout
-	glVertexAttribPointer(0,
-			      DIRAC_COUNT(LineVertex::mPosition, float),
-			      GL_FLOAT,
-			      GL_FALSE,
-			      sizeof(LineVertex),
-			      (void*)(offsetof(LineVertex, mPosition)));
-	glEnableVertexAttribArray(0);
-
-	glVertexAttribPointer(1,
-			      DIRAC_COUNT(LineVertex::mColor, float),
-			      GL_FLOAT,
-			      GL_FALSE,
-			      sizeof(LineVertex),
-			      (void*)(offsetof(LineVertex, mColor)));
-	glEnableVertexAttribArray(1);
-
-	// Unbinding
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	mVertexArray -> addAttribute(Models::VertexAttributes::nLinePosition);
+	mVertexArray -> addAttribute(Models::VertexAttributes::nLineColor);
+			      
+	mVertexBuffer -> bind(false);
+	mVertexArray -> bind(false);
 }
 
 
 void BatchLineRenderer::update(EntityID tCameraID)
 {
-	mShader -> bind();
-	glBindVertexArray(mVertexArrayID);
-	glBindBuffer(GL_ARRAY_BUFFER, mVertexBufferID);
+	mShader 	-> bind();
+	mVertexArray 	-> bind();
+	mVertexBuffer	-> bind();
 	
 	auto lCameraTransform = gManager.getComponent<Transform>(tCameraID);
 	auto lCameraView = gManager.getComponent<View>(tCameraID);
 	
 	Matrix lCameraAttitudeT = transpose(lCameraTransform.mAttitude);
 
-	// Camera view uniforms
 	mShader -> setUniform("uCameraDeltax", lCameraView.mDeltax);
 	mShader -> setUniform("uCameraDeltaz", lCameraView.mDeltaz);
 	mShader -> setUniform("uCameraNear", lCameraView.mNearPlane);
 	mShader -> setUniform("uCameraAspectRatio", lCameraView.mAspectRatio);
 
 	// Pointer to Vertex buffer data
-	LineVertex* lMapBuffer = (LineVertex*)(glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY));
-
+	LineVertex* lMapBuffer = mVertexBuffer -> getBuffer<LineVertex>();
 
 	LineVertex lLineVertex;
 
@@ -89,11 +76,10 @@ void BatchLineRenderer::update(EntityID tCameraID)
 	for (EntityID entity: mEntities)
 	{	
 
-		if (lCurrentVertex >= Constants::MAX_VERTICES_BATCH)
+		if (lCurrentVertex  + 2 > Constants::MAX_VERTICES_BATCH)
 		{
 			break;
 		}
-		// Retrieve Line data
 		Line& lLine = gManager.getComponent<Line>(entity);
  		
 		// Update vertex A
@@ -112,7 +98,8 @@ void BatchLineRenderer::update(EntityID tCameraID)
 
 	}
 
-	glUnmapBuffer(GL_ARRAY_BUFFER);
+	mVertexBuffer -> unmapBuffer();
+
 	glLineWidth(mLineWidth);
 	glDrawArrays(GL_LINES, 0, lCurrentVertex);
 }
@@ -120,9 +107,8 @@ void BatchLineRenderer::update(EntityID tCameraID)
 
 void BatchLineRenderer::destroy(void)
 {
-	glDeleteVertexArrays(1, &mVertexArrayID);
-	glDeleteBuffers(1, &mVertexBufferID);
-	
+	delete mVertexBuffer;
+	delete mVertexArray;
 	delete mShader;
 }
 

@@ -4,7 +4,9 @@
 
 #include "Entity.h"
 #include "System.h"
-#include "IRenderer.h"
+#include "Shader.h"
+#include "VertexArray.h"
+#include "Buffer.h"
 #include "DiracConstants.h"
 #include "RenderingComponents.h"
 
@@ -19,13 +21,19 @@ SIGNATURE:
 - Model
 */
 
-class DynamicBatchRenderer: public ISystem, public IRenderer
+class DynamicBatchRenderer: public ISystem
 {
+	private:
+
+	Graphics::Shader*	mShader		{ nullptr };
+	Graphics::Buffer*	mVertexBuffer	{ nullptr };
+	Graphics::VertexArray*	mVertexArray	{ nullptr };
+
 	public:
 
-	virtual void init(void)	override;
-	virtual void update(EntityID tCameraID) override;
-	virtual void destroy(void) override;
+	void init(void);
+	void update(EntityID tCameraID);
+	void destroy(void);
 };
 
 

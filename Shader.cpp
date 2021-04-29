@@ -8,6 +8,8 @@
 namespace Dirac
 {
 
+namespace Graphics
+{
 
 unsigned int getShaderID(const std::string tShaderAddress, ShaderType tType)
 {
@@ -63,13 +65,18 @@ Shader::Shader(const std::string& tVertexShaderAddress,
 	glDeleteShader(lFragmentID);
 
 	// Register uniforms in the dictionary
-	Dirac::Words lVertexUniforms = findUniforms(tVertexShaderAddress);
+	Dirac::Words lVertexUniforms 	= findUniforms(tVertexShaderAddress);
+	Dirac::Words lFragmentUniforms 	= findUniforms(tFragmentShaderAddress);
 
 	for (auto lUniformName: lVertexUniforms)
 	{	
 		mUniformLocations[lUniformName] = glGetUniformLocation(mID, lUniformName.c_str());
 	}
 
+	for (auto lUniformName: lFragmentUniforms)
+	{	
+		mUniformLocations[lUniformName] = glGetUniformLocation(mID, lUniformName.c_str());
+	}
 }
 
 
@@ -97,28 +104,22 @@ void Shader::setUniform(const std::string& tUniform, float newValue){
 }
 
 
-void Shader::setUniform(const std::string& tUniform, const Vector2& newValue){
+void Shader::setUniform(const std::string& tUniform, Vector2& tVector2){
 
-	newValue.getRaw(mVectorBuffer);
-
-	glUniform2fv(mUniformLocations[tUniform], 1, mVectorBuffer);
+	glUniform2fv(mUniformLocations[tUniform], 1, (float*)(&tVector2));
 }
 
-void Shader::setUniform(const std::string& tUniform, const Vector& newValue){
+void Shader::setUniform(const std::string& tUniform, Vector& newValue){
 
-	newValue.getRaw(mVectorBuffer);
-
-	glUniform3fv(mUniformLocations[tUniform], 1, mVectorBuffer);
+	glUniform3fv(mUniformLocations[tUniform], 1, (float*)(&newValue));
 }
 
 
-void Shader::setUniform(const std::string& tUniform, const Matrix& newValue){
+void Shader::setUniform(const std::string& tUniform, Matrix& tMatrix){
 
-	newValue.getColumnMajorOrder(mMatrixBuffer);
-
-	glUniformMatrix3fv(mUniformLocations[tUniform], 1, GL_FALSE, mMatrixBuffer);
+	glUniformMatrix3fv(mUniformLocations[tUniform], 1, GL_FALSE, (float*)(&tMatrix));
 }
 
-
+};
 
 };

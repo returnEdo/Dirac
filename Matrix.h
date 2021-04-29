@@ -7,14 +7,14 @@
 class Matrix{
 	
 	public:
+
+	Vector col1;
+	Vector col2;
+	Vector col3;
 	
 	Vector row1;
 	Vector row2;
 	Vector row3;
-	
-	Vector col1;
-	Vector col2;
-	Vector col3;
 	
 	Matrix(const Vector& r1, const Vector& r2, const Vector& r3);
 	Matrix(const Matrix& other);

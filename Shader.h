@@ -13,6 +13,8 @@
 namespace Dirac
 {
 
+namespace Graphics
+{
 
 enum class ShaderType
 {
@@ -30,10 +32,6 @@ class Shader
 	unsigned int mID { };
 	std::unordered_map<std::string, int> mUniformLocations;
 
-	// buffers
-	float mVectorBuffer[3];
-	float mMatrixBuffer[9];
-	
 	public:
 
 	Shader(const std::string& tVertexShaderAddress,
@@ -47,11 +45,12 @@ class Shader
 	inline unsigned int getID(void)	{ return mID; }
 
 	void setUniform(const std::string& tUniform, float newValue);
-	void setUniform(const std::string& tUniform, const Vector2& newValue);
-	void setUniform(const std::string& tUniform, const Vector& newValue);
-	void setUniform(const std::string& tUniform, const Matrix& newValue);
+	void setUniform(const std::string& tUniform, Vector2& newValue);
+	void setUniform(const std::string& tUniform, Vector& newValue);
+	void setUniform(const std::string& tUniform, Matrix& newValue);
 
 };
 
+};
 
 };
