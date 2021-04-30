@@ -1,9 +1,9 @@
 *
-!*.cpp
 !*.hpp
-!*/Memory/*.cpp
-!*/Memory/*.hpp
-!.gitignore
-!makefile
-stb_image.h
-stb_image_write.h
+!*.cpp
+!*.shader
+!*/
+/bin
+/executables
+/oldImplementation
+/resources
