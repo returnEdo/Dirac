@@ -3,10 +3,10 @@
 #include <vector>
 #include <string>
 
-#include "DiracConstants.h"
-#include "Vector.h"
-#include "Vector2.h"
-#include "Matrix.h"
+#include "DiracConstants.hpp"
+#include "Vector.hpp"
+#include "Vector2.hpp"
+#include "Matrix.hpp"
 
 
 

@@ -1,9 +1,9 @@
-#include "ScreenManager.h"
+#include "ScreenManager.hpp"
 
 #include <iostream>
 #include <cassert>
 
-#include "DiracMacros.h"
+#include "DiracMacros.hpp"
 
 namespace Dirac
 {

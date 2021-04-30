@@ -1,6 +1,8 @@
 *
 !*.cpp
-!*.h
+!*.hpp
+!*/Memory/*.cpp
+!*/Memory/*.hpp
 !.gitignore
 !makefile
 stb_image.h

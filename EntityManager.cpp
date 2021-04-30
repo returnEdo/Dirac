@@ -1,6 +1,6 @@
-#include "EntityManager.h"
+#include "EntityManager.hpp"
 
-#include "DiracMacros.h"
+#include "DiracMacros.hpp"
 
 
 namespace Dirac

@@ -3,9 +3,9 @@
 #include <array>
 #include <memory>
 
-#include "ECSConstants.h"
-#include "Entity.h"
-#include "System.h"
+#include "ECSConstants.hpp"
+#include "Entity.hpp"
+#include "System.hpp"
 
 
 /*

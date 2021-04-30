@@ -1,13 +1,13 @@
-#include "BatchLineRenderer.h"
+#include "BatchLineRenderer.hpp"
 
 #include <GL/glew.h>
 #include <cstddef>
 #include <cstring>
 
-#include "DiracConstants.h"
-#include "DiracMacros.h"
-#include "Shader.h"
-#include "Manager.h"
+#include "DiracConstants.hpp"
+#include "DiracMacros.hpp"
+#include "Shader.hpp"
+#include "Manager.hpp"
 
 
 
@@ -34,11 +34,11 @@ namespace VertexAttributes
 void BatchLineRenderer::init(void)
 {
 	
-	mShader = new Graphics::Shader("./resources/shaders/lineVertex.shader",
-			     	       "./resources/shaders/lineFragment.shader");
+	mShader.allocate(new Graphics::Shader("./resources/shaders/lineVertex.shader",
+				     	      "./resources/shaders/lineFragment.shader"));
 
-	mVertexArray 	= new Graphics::VertexArray();
-	mVertexBuffer 	= new Graphics::Buffer(GL_ARRAY_BUFFER);
+	mVertexArray.allocate(new Graphics::VertexArray());
+	mVertexBuffer.allocate(new Graphics::Buffer(GL_ARRAY_BUFFER));
 	
 	mVertexBuffer -> allocate(sizeof(LineVertex) * Constants::MAX_VERTICES_BATCH);
 
@@ -103,15 +103,6 @@ void BatchLineRenderer::update(EntityID tCameraID)
 	glLineWidth(mLineWidth);
 	glDrawArrays(GL_LINES, 0, lCurrentVertex);
 }
-
-
-void BatchLineRenderer::destroy(void)
-{
-	delete mVertexBuffer;
-	delete mVertexArray;
-	delete mShader;
-}
-
 
 
 };

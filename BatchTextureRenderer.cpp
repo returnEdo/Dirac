@@ -1,4 +1,4 @@
-#include "BatchTextureRenderer.h"
+#include "BatchTextureRenderer.hpp"
 
 #include <cstddef>
 #include <cstring>
@@ -6,8 +6,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-#include "DiracConstants.h"
-#include "Manager.h"
+#include "DiracConstants.hpp"
+#include "Manager.hpp"
 
 
 extern Dirac::Manager gManager;
@@ -41,12 +41,12 @@ namespace Models
 void BatchTextureRenderer::init(const std::string& tTextureAtlasAddress)
 {
 	// Compile shader
-	mShader = new Graphics::Shader("resources/shaders/textureVertex.shader",
-			     	       "resources/shaders/textureFragment.shader");
+	mShader.allocate(new Graphics::Shader("resources/shaders/textureVertex.shader",
+				     	      "resources/shaders/textureFragment.shader"));
 	
-	mVertexArray	= new Graphics::VertexArray();
-	mVertexBuffer 	= new Graphics::Buffer(GL_ARRAY_BUFFER); 
-	mIndexBuffer 	= new Graphics::Buffer(GL_ELEMENT_ARRAY_BUFFER);
+	mVertexArray.allocate(new Graphics::VertexArray());
+	mVertexBuffer.allocate(new Graphics::Buffer(GL_ARRAY_BUFFER)); 
+	mIndexBuffer.allocate(new Graphics::Buffer(GL_ELEMENT_ARRAY_BUFFER));
 	// Generate buffers
 
 	mVertexBuffer -> allocate(sizeof(Models::nQuadVertex) * Constants::MAX_VERTICES_BATCH);
@@ -56,7 +56,7 @@ void BatchTextureRenderer::init(const std::string& tTextureAtlasAddress)
 	mVertexArray -> addAttribute(Models::nAttributeTextureUV);
 
 	// Texture atlas
-	mTexture = new Graphics::Texture(tTextureAtlasAddress);
+	mTexture.allocate(new Graphics::Texture(tTextureAtlasAddress));
 
 	mShader -> bind();
 	mShader -> setUniform("uTextureAtlas", 0);
@@ -73,11 +73,11 @@ void BatchTextureRenderer::update(EntityID tCameraID)
 	View lCameraView = gManager.getComponent<View>(tCameraID);
 	Matrix lCameraAttitudeT = transpose(lCameraTransform.mAttitude);
 
-	mTexture -> bind();
-	mShader -> bind();
-	mVertexArray -> bind();
-	mVertexBuffer -> bind();
-	mIndexBuffer -> bind();
+	mTexture 	-> bind();
+	mShader 	-> bind();
+	mVertexArray 	-> bind();
+	mVertexBuffer 	-> bind();
+	mIndexBuffer 	-> bind();
 
 	// camera view uniforms
 	mShader -> setUniform("uCameraDeltax", 		lCameraView.mDeltax);
@@ -98,7 +98,6 @@ void BatchTextureRenderer::update(EntityID tCameraID)
 	
 	for (auto entity: mEntities)
 	{
-		// Retrieve components
 		Transform& lEntityTransform 	= gManager.getComponent<Transform>(entity);	// world coordinates
 		Texture& lTexture		= gManager.getComponent<Texture>(entity);
 		
@@ -107,11 +106,9 @@ void BatchTextureRenderer::update(EntityID tCameraID)
 			lVertex.mPosition 	= lCameraAttitudeT * (lEntityTransform.mAttitude * (lEntityTransform.mShear * vertex.mPosition) + lEntityTransform.mPosition - lCameraTransform.mPosition);
 			lVertex.mTextureUV	= lTexture.mBottomLeft + Vector2(vertex.mTextureUV.x * lTexture.mWidth,
 										 vertex.mTextureUV.y * lTexture.mHeight);
-
 			lVertex.mTextureUV.x 	/= lTextureWidth_float;
 			lVertex.mTextureUV.y 	/= lTextureHeight_float;
 
-			// Filling the buffer
 			memcpy((lMapBuffer + lCurrentVertex), &lVertex, sizeof(TextureVertex));
 			
 			lCurrentVertex ++;
@@ -131,16 +128,6 @@ void BatchTextureRenderer::update(EntityID tCameraID)
 		       mEntities.size() * 6,
 		       GL_UNSIGNED_INT,
 		       0);
-}
-
-
-void BatchTextureRenderer::destroy(void)
-{
-	delete mShader;
-	delete mVertexBuffer;
-	delete mIndexBuffer;
-	delete mTexture;
-	delete mVertexArray;
 }
 
 

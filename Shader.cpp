@@ -1,8 +1,8 @@
-#include "Shader.h"
+#include "Shader.hpp"
 
 
-#include "DiracMacros.h"
-#include "Parser.h"
+#include "DiracMacros.hpp"
+#include "Parser.hpp"
 
 
 namespace Dirac

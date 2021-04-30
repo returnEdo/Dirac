@@ -2,11 +2,11 @@
 
 #include <memory>
 
-#include "EntityManager.h"
-#include "ComponentManager.h"
-#include "SystemManager.h"
-#include "Entity.h"
-#include "System.h"
+#include "EntityManager.hpp"
+#include "ComponentManager.hpp"
+#include "SystemManager.hpp"
+#include "Entity.hpp"
+#include "System.hpp"
 
 
 

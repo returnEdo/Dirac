@@ -3,9 +3,9 @@
 #include <array>
 #include <unordered_map>
 
-#include "ECSConstants.h"
-#include "Entity.h"
-#include "DiracMacros.h"
+#include "ECSConstants.hpp"
+#include "Entity.hpp"
+#include "DiracMacros.hpp"
 
 /*
 INFO:

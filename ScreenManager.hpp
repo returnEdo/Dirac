@@ -5,9 +5,9 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "DiracConstants.h"
-#include "Vector.h"
-#include "Vector2.h"
+#include "DiracConstants.hpp"
+#include "Vector.hpp"
+#include "Vector2.hpp"
 
 
 namespace Dirac

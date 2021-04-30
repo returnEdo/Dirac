@@ -4,9 +4,9 @@
 #include <unordered_map>
 #include <GL/glew.h>
 
-#include "Vector2.h"
-#include "Vector.h"
-#include "Matrix.h"
+#include "Vector2.hpp"
+#include "Vector.hpp"
+#include "Matrix.hpp"
 
 
 

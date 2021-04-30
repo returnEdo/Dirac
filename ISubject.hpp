@@ -2,8 +2,8 @@
 
 #include <string>
 
-#include "DiracMacros.h"
-#include "IObserver.h"
+#include "DiracMacros.hpp"
+#include "IObserver.hpp"
 
 
 namespace Dirac

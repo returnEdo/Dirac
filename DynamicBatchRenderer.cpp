@@ -1,12 +1,12 @@
-#include "DynamicBatchRenderer.h"
+#include "DynamicBatchRenderer.hpp"
 
 #include <GL/glew.h>
-#include <cstddef>		// offsetof
-#include <cstring>		// memcpy
+#include <cstddef>
+#include <cstring>
 
-#include "Shader.h"
-#include "Manager.h"
-#include "DiracMacros.h"
+#include "Shader.hpp"
+#include "Manager.hpp"
+#include "DiracMacros.hpp"
 
 
 extern Dirac::Manager gManager;
@@ -33,11 +33,11 @@ namespace VertexAttributes
 void DynamicBatchRenderer::init(void)
 {
 	// Shader
-	mShader = new Graphics::Shader("./resources/shaders/batchVertex.shader",
-			  	       "./resources/shaders/batchFragment.shader");
+	mShader.allocate(new Graphics::Shader("./resources/shaders/batchVertex.shader",
+			  	       	      "./resources/shaders/batchFragment.shader"));
 	
-	mVertexArray 	= new Graphics::VertexArray();
-	mVertexBuffer	= new Graphics::Buffer(GL_ARRAY_BUFFER);
+	mVertexArray.allocate(new Graphics::VertexArray());
+	mVertexBuffer.allocate(new Graphics::Buffer(GL_ARRAY_BUFFER));
 
 	mVertexBuffer -> allocate(Constants::MAX_VERTICES_BATCH * sizeof(Vertex));
 
@@ -102,14 +102,5 @@ void DynamicBatchRenderer::update(EntityID tCameraID)
 	glDrawArrays(GL_TRIANGLES, 0, sizeof(Vertex) * lCurrentVertex);
 
 }
-
-
-void DynamicBatchRenderer::destroy(void)
-{
-	delete mVertexBuffer;
-	delete mVertexArray;
-	delete mShader;
-}
-
 
 };

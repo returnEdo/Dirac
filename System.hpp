@@ -2,8 +2,8 @@
 
 #include <set>
 
-#include "ECSConstants.h"
-#include "Entity.h"
+#include "ECSConstants.hpp"
+#include "Entity.hpp"
 
 
 namespace Dirac

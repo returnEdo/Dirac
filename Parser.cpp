@@ -1,8 +1,8 @@
-#include "Parser.h"
+#include "Parser.hpp"
 
 #include <fstream>
 
-#include "DiracMacros.h"
+#include "DiracMacros.hpp"
 
 
 namespace Dirac

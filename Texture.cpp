@@ -1,9 +1,8 @@
-#include "Texture.h"
+#include "Texture.hpp"
 
 #include <GL/glew.h>
 
-#include "DiracMacros.h"
-//#define STB_IMAGE_IMPLEMENTATION
+#include "DiracMacros.hpp"
 #include "stb_image.h"
 
 
