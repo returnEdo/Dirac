@@ -104,18 +104,18 @@ void Shader::setUniform(const std::string& tUniform, float newValue){
 }
 
 
-void Shader::setUniform(const std::string& tUniform, Vector2& tVector2){
+void Shader::setUniform(const std::string& tUniform, Math::vec2& tVec2){
 
-	glUniform2fv(mUniformLocations[tUniform], 1, (float*)(&tVector2));
+	glUniform2fv(mUniformLocations[tUniform], 1, (float*)(&tVec2));
 }
 
-void Shader::setUniform(const std::string& tUniform, Vector& newValue){
+void Shader::setUniform(const std::string& tUniform, Math::vec3& newValue){
 
 	glUniform3fv(mUniformLocations[tUniform], 1, (float*)(&newValue));
 }
 
 
-void Shader::setUniform(const std::string& tUniform, Matrix& tMatrix){
+void Shader::setUniform(const std::string& tUniform, Math::mat3& tMatrix){
 
 	glUniformMatrix3fv(mUniformLocations[tUniform], 1, GL_FALSE, (float*)(&tMatrix));
 }

@@ -8,6 +8,7 @@
 
 #include "DiracConstants.hpp"
 #include "Manager.hpp"
+#include "mat3.hpp"
 
 
 extern Dirac::Manager gManager;
@@ -21,10 +22,10 @@ namespace Models
 	// Quad vertex buffer
 	TextureVertex 	nQuadVertex[] =
 	{
-		{Vector(-0.5f, -0.5f, 0.0f), Vector2(0.0f, 0.0f)},
-		{Vector( 0.5f, -0.5f, 0.0f), Vector2(1.0f, 0.0f)},
-		{Vector( 0.5f,  0.5f, 0.0f), Vector2(1.0f, 1.0f)},
-		{Vector(-0.5f,  0.5f, 0.0f), Vector2(0.0f, 1.0f)}
+		{Math::vec3(-0.5f, -0.5f, 0.0f), Math::vec2(0.0f, 0.0f)},
+		{Math::vec3( 0.5f, -0.5f, 0.0f), Math::vec2(1.0f, 0.0f)},
+		{Math::vec3( 0.5f,  0.5f, 0.0f), Math::vec2(1.0f, 1.0f)},
+		{Math::vec3(-0.5f,  0.5f, 0.0f), Math::vec2(0.0f, 1.0f)}
 	};
 
 	// Quad index buffer
@@ -71,7 +72,7 @@ void BatchTextureRenderer::update(EntityID tCameraID)
 {
 	Transform lCameraTransform = gManager.getComponent<Transform>(tCameraID);
 	View lCameraView = gManager.getComponent<View>(tCameraID);
-	Matrix lCameraAttitudeT = transpose(lCameraTransform.mAttitude);
+	Math::mat3 lCameraAttitudeT = transpose(lCameraTransform.mAttitude);
 
 	mTexture 	-> bind();
 	mShader 	-> bind();
@@ -104,7 +105,7 @@ void BatchTextureRenderer::update(EntityID tCameraID)
 		for (const TextureVertex& vertex: Models::nQuadVertex)
 		{	
 			lVertex.mPosition 	= lCameraAttitudeT * (lEntityTransform.mAttitude * (lEntityTransform.mShear * vertex.mPosition) + lEntityTransform.mPosition - lCameraTransform.mPosition);
-			lVertex.mTextureUV	= lTexture.mBottomLeft + Vector2(vertex.mTextureUV.x * lTexture.mWidth,
+			lVertex.mTextureUV	= lTexture.mBottomLeft + Math::vec2(vertex.mTextureUV.x * lTexture.mWidth,
 										 vertex.mTextureUV.y * lTexture.mHeight);
 			lVertex.mTextureUV.x 	/= lTextureWidth_float;
 			lVertex.mTextureUV.y 	/= lTextureHeight_float;

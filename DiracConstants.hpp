@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Vector.hpp"
+#include "vec3.hpp"
 
 namespace Constants{
 
@@ -9,7 +9,7 @@ namespace Constants{
 	const int		WINDOW_WIDTH		= 1080;
 	const int 		WINDOW_HEIGHT		= 720;
 	const float		ASPECT_RATIO		= static_cast<float>(Constants::WINDOW_WIDTH) / static_cast<float>(Constants::WINDOW_HEIGHT);
-	const Vector		BACKGROUND_COLOR(.3f);
+	const Dirac::Math::vec3		BACKGROUND_COLOR(.3f);
 
 	/* Object constants */
 

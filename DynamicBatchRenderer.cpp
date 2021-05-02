@@ -7,6 +7,7 @@
 #include "Shader.hpp"
 #include "Manager.hpp"
 #include "DiracMacros.hpp"
+#include "mat3.hpp"
 
 
 extern Dirac::Manager gManager;
@@ -74,7 +75,7 @@ void DynamicBatchRenderer::update(EntityID tCameraID)
 
 	unsigned int lCurrentVertex = 0;
 	
-	Matrix lCameraAttitudeT = transpose(lCameraTransform.mAttitude);
+	Math::mat3 lCameraAttitudeT = transpose(lCameraTransform.mAttitude);
 	
 	for (EntityID entity: mEntities)
 	{

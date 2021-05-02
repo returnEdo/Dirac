@@ -4,9 +4,9 @@
 #include <string>
 
 #include "DiracConstants.hpp"
-#include "Vector.hpp"
-#include "Vector2.hpp"
-#include "Matrix.hpp"
+#include "vec3.hpp"
+#include "vec2.hpp"
+#include "mat3.hpp"
 
 
 
@@ -17,37 +17,37 @@ namespace Dirac
 // Vertex data layout
 struct Vertex
 {
-	Vector mPosition;
-	Vector mNormal;
-	Vector mColor;
+	Math::vec3 mPosition;
+	Math::vec3 mNormal;
+	Math::vec3 mColor;
 };
 
 struct LineVertex
 {	
-	Vector mPosition;
-	Vector mColor;
+	Math::vec3 mPosition;
+	Math::vec3 mColor;
 };
 
 struct TextureVertex
 {
-	Vector mPosition;
-	Vector2 mTextureUV;
+	Math::vec3 mPosition;
+	Math::vec2 mTextureUV;
 };
 
 
 // Components
 struct Transform
 {
-	Vector 	mPosition;
-	Matrix 	mAttitude;
-	Matrix	mShear;
+	Math::vec3 	mPosition;
+	Math::mat3 	mAttitude;
+	Math::mat3	mShear;
 };
 
 
 struct Color
 {
-	Vector	mColor;
-	float	mAlpha;
+	Math::vec3	mColor;
+	float		mAlpha;
 };
 
 
@@ -63,7 +63,7 @@ struct View
 struct Texture
 {	
 	// Texture coordinates of the quad
-	Vector2 mBottomLeft;
+	Math::vec2 mBottomLeft;
 
 	float mWidth;		// e.g.: 32 bit
 	float mHeight;

@@ -8,6 +8,7 @@
 #include "DiracMacros.hpp"
 #include "Shader.hpp"
 #include "Manager.hpp"
+#include "mat3.hpp"
 
 
 
@@ -59,7 +60,7 @@ void BatchLineRenderer::update(EntityID tCameraID)
 	auto lCameraTransform = gManager.getComponent<Transform>(tCameraID);
 	auto lCameraView = gManager.getComponent<View>(tCameraID);
 	
-	Matrix lCameraAttitudeT = transpose(lCameraTransform.mAttitude);
+	Math::mat3 lCameraAttitudeT = transpose(lCameraTransform.mAttitude);
 
 	mShader -> setUniform("uCameraDeltax", lCameraView.mDeltax);
 	mShader -> setUniform("uCameraDeltaz", lCameraView.mDeltaz);

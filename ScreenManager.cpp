@@ -9,7 +9,7 @@ namespace Dirac
 {
 
 std::unordered_map<int, int> ScreenManager::mKeyState;
-Vector2 ScreenManager::mMousePosition;
+Math::vec2 ScreenManager::mMousePosition;
 
 
 ScreenManager::ScreenManager(int tWidth, int tHeight, const std::string& tTitle):
@@ -18,10 +18,6 @@ ScreenManager::ScreenManager(int tWidth, int tHeight, const std::string& tTitle)
 	// Create window
 
 	glfwInit();
-//	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-//	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-//	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
 
 	mWindow = glfwCreateWindow(mWidth, mHeight, tTitle.c_str(), NULL, NULL);
 	if (mWindow == NULL)

@@ -2,7 +2,7 @@ CC := g++
 CFLAGS := $(CFLAGS)
 LDFLAGS := -lGL -lGLU -lGLEW -lglfw
 BIN_DIR := bin
-CPP_SOURCE := $(wildcard *.cpp)
+CPP_SOURCE := $(wildcard *.cpp) $(wildcard Memory/*.cpp)
 OBJ_DEST  := $(CPP_SOURCE:%.cpp=$(BIN_DIR)/%.o)
  
  

@@ -6,8 +6,8 @@
 #include <GLFW/glfw3.h>
 
 #include "DiracConstants.hpp"
-#include "Vector.hpp"
-#include "Vector2.hpp"
+#include "vec3.hpp"
+#include "vec2.hpp"
 
 
 namespace Dirac
@@ -22,10 +22,10 @@ class ScreenManager{
 	int mWidth;
 	int mHeight;
 
-	Vector mBackgroundColor	= Constants::BACKGROUND_COLOR;
+	Math::vec3 mBackgroundColor	= Constants::BACKGROUND_COLOR;
 	
 	static std::unordered_map<int, int> mKeyState;
-	static Vector2 mMousePosition;
+	static Math::vec2 mMousePosition;
 
 	public:
 
@@ -41,7 +41,7 @@ class ScreenManager{
 	inline float getAspectRatio(void)					const { return (static_cast<float>(mWidth) / static_cast<float>(mHeight)); }
 
 	static inline const std::unordered_map<int, int>& getKeyState(void) 	{ return ScreenManager::mKeyState; }
-	static inline const Vector2& getMousePosition(void)			{ return ScreenManager::mMousePosition; }
+	static inline const Math::vec2& getMousePosition(void)			{ return ScreenManager::mMousePosition; }
 	
 	static inline bool isPressed(int key)					{ return (ScreenManager::mKeyState[key] == GLFW_PRESS); }
 	static inline bool isReleased(int key)					{ return (ScreenManager::mKeyState[key] == GLFW_RELEASE); }
@@ -51,7 +51,7 @@ class ScreenManager{
 	/* setters */
 	inline void wireframe(void)						const { glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); }
 	inline void fill(void)							const { glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); }
-	inline void setBackgroundColor(const Vector& tBackgroundColor)		{ mBackgroundColor = tBackgroundColor; }
+	inline void setBackgroundColor(const Math::vec3& tBackgroundColor)		{ mBackgroundColor = tBackgroundColor; }
 
 
 	/* callbacks */

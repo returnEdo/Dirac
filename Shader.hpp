@@ -4,9 +4,9 @@
 #include <unordered_map>
 #include <GL/glew.h>
 
-#include "Vector2.hpp"
-#include "Vector.hpp"
-#include "Matrix.hpp"
+#include "vec2.hpp"
+#include "vec3.hpp"
+#include "mat3.hpp"
 
 
 
@@ -45,9 +45,9 @@ class Shader
 	inline unsigned int getID(void)	{ return mID; }
 
 	void setUniform(const std::string& tUniform, float newValue);
-	void setUniform(const std::string& tUniform, Vector2& newValue);
-	void setUniform(const std::string& tUniform, Vector& newValue);
-	void setUniform(const std::string& tUniform, Matrix& newValue);
+	void setUniform(const std::string& tUniform, Math::vec2& newValue);
+	void setUniform(const std::string& tUniform, Math::vec3& newValue);
+	void setUniform(const std::string& tUniform, Math::mat3& newValue);
 
 };
 
