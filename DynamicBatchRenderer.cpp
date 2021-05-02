@@ -25,7 +25,7 @@ namespace VertexAttributes
 	Graphics::Attribute nDynamicBatchPosition {DIRAC_COUNT(Vertex::mPosition, float), GL_FLOAT, sizeof(Vertex), offsetof(Vertex, mPosition)};
 	Graphics::Attribute nDynamicBatchNormal   {DIRAC_COUNT(Vertex::mNormal, float), GL_FLOAT, sizeof(Vertex), offsetof(Vertex, mNormal)};
 	Graphics::Attribute nDynamicBatchColor 	  {DIRAC_COUNT(Vertex::mColor, float), GL_FLOAT, sizeof(Vertex), offsetof(Vertex, mColor)};
-
+	Graphics::Attribute nDynamicBatchAlpha 	  {DIRAC_COUNT(Vertex::mAlpha, float), GL_FLOAT, sizeof(Vertex), offsetof(Vertex, mAlpha)};
 };
 
 };
@@ -46,6 +46,7 @@ void DynamicBatchRenderer::init(void)
 	mVertexArray -> addAttribute(Models::VertexAttributes::nDynamicBatchPosition);
 	mVertexArray -> addAttribute(Models::VertexAttributes::nDynamicBatchNormal);
 	mVertexArray -> addAttribute(Models::VertexAttributes::nDynamicBatchColor);
+	mVertexArray -> addAttribute(Models::VertexAttributes::nDynamicBatchAlpha);
 
 	// Unbinding
 	mVertexBuffer 	-> bind(false);
@@ -90,6 +91,7 @@ void DynamicBatchRenderer::update(EntityID tCameraID)
 			lVertex.mPosition 	= lCameraAttitudeT * (lEntityTransform.mAttitude * (lEntityTransform.mShear * vertex.mPosition) + lEntityTransform.mPosition - lCameraTransform.mPosition);
 			lVertex.mNormal 	= lEntityTransform.mAttitude * vertex.mNormal;
 			lVertex.mColor 		= lColor.mColor;
+			lVertex.mAlpha 		= lColor.mAlpha;
 
 			memcpy((lMapBuffer + lCurrentVertex), &lVertex, sizeof(Vertex));
 

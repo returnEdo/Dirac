@@ -26,6 +26,7 @@ namespace VertexAttributes
 	
 	Graphics::Attribute nLinePosition {DIRAC_COUNT(LineVertex::mPosition, float), GL_FLOAT, sizeof(LineVertex), offsetof(LineVertex, mPosition)};
 	Graphics::Attribute nLineColor	  {DIRAC_COUNT(LineVertex::mColor, float),    GL_FLOAT, sizeof(LineVertex), offsetof(LineVertex, mColor)};
+	Graphics::Attribute nLineAlpha	  {DIRAC_COUNT(LineVertex::mAlpha, float),    GL_FLOAT, sizeof(LineVertex), offsetof(LineVertex, mAlpha)};
 };
 
 
@@ -45,6 +46,7 @@ void BatchLineRenderer::init(void)
 
 	mVertexArray -> addAttribute(Models::VertexAttributes::nLinePosition);
 	mVertexArray -> addAttribute(Models::VertexAttributes::nLineColor);
+	mVertexArray -> addAttribute(Models::VertexAttributes::nLineAlpha);
 			      
 	mVertexBuffer -> bind(false);
 	mVertexArray -> bind(false);
@@ -84,15 +86,17 @@ void BatchLineRenderer::update(EntityID tCameraID)
 		Line& lLine = gManager.getComponent<Line>(entity);
  		
 		// Update vertex A
-		lLineVertex.mPosition = lCameraAttitudeT * (lLine.mVertexA.mPosition - lCameraTransform.mPosition);
-		lLineVertex.mColor = lLine.mVertexA.mColor;
+		lLineVertex.mPosition 	= lCameraAttitudeT * (lLine.mVertexA.mPosition - lCameraTransform.mPosition);
+		lLineVertex.mColor 	= lLine.mVertexA.mColor;
+		lLineVertex.mAlpha	= lLine.mVertexA.mAlpha;
 
 		memcpy((lMapBuffer + lCurrentVertex), &lLineVertex, sizeof(LineVertex));
 		lCurrentVertex ++;
 
 		// Update vertex B
-		lLineVertex.mPosition = lCameraAttitudeT * (lLine.mVertexB.mPosition - lCameraTransform.mPosition);
-		lLineVertex.mColor = lLine.mVertexB.mColor;
+		lLineVertex.mPosition 	= lCameraAttitudeT * (lLine.mVertexB.mPosition - lCameraTransform.mPosition);
+		lLineVertex.mColor 	= lLine.mVertexB.mColor;
+		lLineVertex.mAlpha	= lLine.mVertexB.mAlpha;
 
 		memcpy((lMapBuffer + lCurrentVertex), &lLineVertex, sizeof(LineVertex));
 		lCurrentVertex ++;

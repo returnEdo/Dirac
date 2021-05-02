@@ -20,18 +20,21 @@ struct Vertex
 	Math::vec3 mPosition;
 	Math::vec3 mNormal;
 	Math::vec3 mColor;
+	float      mAlpha;
 };
 
 struct LineVertex
 {	
 	Math::vec3 mPosition;
 	Math::vec3 mColor;
+	float      mAlpha;
 };
 
 struct TextureVertex
 {
 	Math::vec3 mPosition;
 	Math::vec2 mTextureUV;
+	float 	   mAlpha;
 };
 
 
@@ -67,6 +70,8 @@ struct Texture
 
 	float mWidth;		// e.g.: 32 bit
 	float mHeight;
+
+	float mAlpha;
 };
 
 

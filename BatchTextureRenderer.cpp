@@ -37,6 +37,7 @@ namespace Models
 
 	Graphics::Attribute nAttributePosition  {DIRAC_COUNT(TextureVertex::mPosition, float), GL_FLOAT, sizeof(TextureVertex), offsetof(TextureVertex, mPosition)};
 	Graphics::Attribute nAttributeTextureUV {DIRAC_COUNT(TextureVertex::mTextureUV, float), GL_FLOAT, sizeof(TextureVertex), offsetof(TextureVertex, mTextureUV)};
+	Graphics::Attribute nAttributeAlpha	{DIRAC_COUNT(TextureVertex::mAlpha, float), GL_FLOAT, sizeof(TextureVertex), offsetof(TextureVertex, mAlpha)};
 };
 
 void BatchTextureRenderer::init(const std::string& tTextureAtlasAddress)
@@ -55,6 +56,7 @@ void BatchTextureRenderer::init(const std::string& tTextureAtlasAddress)
 
 	mVertexArray -> addAttribute(Models::nAttributePosition);
 	mVertexArray -> addAttribute(Models::nAttributeTextureUV);
+	mVertexArray -> addAttribute(Models::nAttributeAlpha);
 
 	// Texture atlas
 	mTexture.allocate(new Graphics::Texture(tTextureAtlasAddress));
@@ -109,6 +111,7 @@ void BatchTextureRenderer::update(EntityID tCameraID)
 										 vertex.mTextureUV.y * lTexture.mHeight);
 			lVertex.mTextureUV.x 	/= lTextureWidth_float;
 			lVertex.mTextureUV.y 	/= lTextureHeight_float;
+			lVertex.mAlpha 		= lTexture.mAlpha;
 
 			memcpy((lMapBuffer + lCurrentVertex), &lVertex, sizeof(TextureVertex));
 			
