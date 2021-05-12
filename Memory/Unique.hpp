@@ -16,8 +16,12 @@ class Unique
 
 	public:
 
-	Unique(void):		mPointer(nullptr)	{}
-	Unique(T* tPointer):	mPointer(tPointer)	{}
+	Unique(void):			mPointer(nullptr)		{}
+	Unique(T* tPointer):		mPointer(tPointer)		{}
+	
+	template <typename ... TypeArgs>
+	Unique(TypeArgs ... typeArgs):	mPointer(new T(typeArgs ...))	{}
+
 	Unique(Unique<T>& tUnique)
 	{
 		tUnique.moveTo(*this);
@@ -34,6 +38,12 @@ class Unique
 	void allocate(T* tPointer)
 	{
 		mPointer = tPointer;
+	}
+
+	template <typename ... TypeArgs>
+	void allocate(TypeArgs ... typeArgs)
+	{
+		mPointer = new T(typeArgs ...);
 	}
 
 	void destroy()

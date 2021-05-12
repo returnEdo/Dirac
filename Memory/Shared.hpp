@@ -21,8 +21,12 @@ class Shared
 
 	Shared(void):			mPointer(nullptr)		{}
 	Shared(T* tPointer):		mPointer(tPointer)		{ mCounter++; }
-	Shared(Shared<T>& tShared):	mPointer(tShared.mPointer)	{ mCounter++; }
 	
+	template <typename ... TypeArgs>
+	Shared(TypeArgs ... typeArgs):	mPointer(new T(typeArgs ...))	{ mCounter++; }
+
+	Shared(Shared<T>& tShared):	mPointer(tShared.mPointer)	{ mCounter++; }
+
 	~Shared(void)
 	{
 		if (mPointer != nullptr)

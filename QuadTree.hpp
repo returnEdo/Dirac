@@ -4,8 +4,10 @@
 
 #include "vec2.hpp"
 #include "Entity.hpp"
+#include "System.hpp"
 #include "Memory/Unique.hpp"
 #include "Memory/MemoryPool.hpp"
+#include "DiracConstants.hpp"
 
 namespace Dirac
 {
@@ -21,35 +23,56 @@ struct QuadNode
 	QuadNode* 		mQuadrantI	{ nullptr };
 	QuadNode* 		mQuadrantII	{ nullptr };
 	QuadNode* 		mQuadrantIII	{ nullptr };
-	QuadNode* 		mQuadrantVI	{ nullptr };
+	QuadNode* 		mQuadrantIV	{ nullptr };
 
 	Math::vec2 		mPosition;
 	Math::vec2 		mDimensions;
 
 	std::vector<EntityID>	mEntities;
 
-	unsigned int 		mDepth		{ 0 };
+	unsigned int 		mDepth		{ 1 };
 	bool 			mPartitioned	{ false };
+
+	QuadNode(QuadNode* tParent, Math::vec2 tPosition, Math::vec2 tDimension, unsigned int tDepth):
+			mParent(tParent),
+			mQuadrantI(nullptr),
+			mQuadrantII(nullptr),
+			mQuadrantIII(nullptr),
+			mQuadrantIV(nullptr),
+			mPosition(tPosition),
+			mDimensions(tDimension),
+			mDepth(tDepth),
+			mPartitioned(false) 	{ if (not mEntities.empty()) { mEntities.clear(); } }
 };
 
 
 using QuadPool = Memory::Unique<Memory::MemoryPool<QuadNode>>;
 
 
-class QuadTree
+/*
+SIGNATURE:
+- Transform
+- Physics::AABB
+*/
+
+
+class QuadTree: public ISystem
 {
 	private:
 
 	QuadNode*	mRoot	{ nullptr };
 	QuadPool	mMemoryPool;
+
+	void clear(QuadNode* tCurrentNode);
+	void clearRoot(void);
 	
 	public:
 
-	QuadTree(const Math::vec2 tQuadPosition, const Math::vec2& tQuadDimensions);
+	void init(const Math::vec2 tQuadPosition = Math::vec2(),
+		  const Math::vec2& tQuadDimensions = Math::vec2(Constants::DELTAX, Constants::DELTAX / Constants::ASPECT_RATIO));
+	void update(void);
 	
 	bool insert(EntityID tID, const Math::vec2& tBoxPosition, const Math::vec2& tBoxDimensions, QuadNode* tCurrentNode);
-//	void insert(EntityID tID, const AABB& tBox);
-//	void clear(void);
 };
 
 

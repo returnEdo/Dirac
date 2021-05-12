@@ -23,6 +23,13 @@ struct Dynamics
 };
 
 
+struct Forces
+{
+	Math::vec2 	mForce;
+	float 		mTorque;
+};
+
+
 struct Inertia
 {	
 	float	mMass;

@@ -36,6 +36,7 @@ namespace VertexAttributes
 void BatchLineRenderer::init(void)
 {
 	
+	DBG;
 	mShader.allocate(new Graphics::Shader("./resources/shaders/lineVertex.shader",
 				     	      "./resources/shaders/lineFragment.shader"));
 

@@ -51,6 +51,26 @@ class MemoryPool
 		return ((T*)(mPool) + lIndex);	
 	}
 
+
+	template <typename ... TypeArgs>
+	T* getMemory(TypeArgs ... typeArgs)
+	{
+		if (mIndexes.empty())
+		{
+			return nullptr;
+		}
+
+		unsigned int lIndex = mIndexes.front();
+		mIndexes.pop();
+
+		T* lPointer = (T*)(mPool) + lIndex;
+
+		*lPointer = T(typeArgs ...);
+		
+		return lPointer;	
+	}
+
+
 	bool freeMemory(T* mData)
 	{
 		unsigned int lIndex = ((uint8_t*)mData - mPool) / mTypeSize;	
@@ -64,6 +84,7 @@ class MemoryPool
 
 		return false;
 	}
+
 
 	unsigned int sizeAvailable(void)
 	{
