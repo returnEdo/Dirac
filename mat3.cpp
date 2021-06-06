@@ -148,16 +148,16 @@ mat3 inv(const mat3& a){
 	assert(dt != .0);
 	
 	vec3 r1 = vec3(a.row2.y * a.row3.z - a.row2.z * a.row3.y,
-					   a.row2.z * a.row3.x - a.row2.x * a.row3.z,
-					   a.row2.x * a.row3.y - a.row2.y * a.row3.x);
+				   a.row2.z * a.row3.x - a.row2.x * a.row3.z,
+				   a.row2.x * a.row3.y - a.row2.y * a.row3.x);
 	
 	vec3 r2 = vec3(a.row3.y * a.row1.z - a.row3.z * a.row1.y,
-					   a.row3.z * a.row1.x - a.row3.x * a.row1.z,
-					   a.row3.x * a.row1.y - a.row3.y * a.row1.x);
+				   a.row3.z * a.row1.x - a.row3.x * a.row1.z,
+				   a.row3.x * a.row1.y - a.row3.y * a.row1.x);
 	
 	vec3 r3 = vec3(a.row1.y * a.row2.z - a.row1.z * a.row2.y,
-    				   a.row1.z * a.row2.x - a.row1.x * a.row2.z,
-    				   a.row1.x * a.row2.y - a.row1.y * a.row2.x);
+				   a.row1.z * a.row2.x - a.row1.x * a.row2.z,
+				   a.row1.x * a.row2.y - a.row1.y * a.row2.x);
     
     return transpose(mat3(r1, r2, r3)) / dt;
 }
