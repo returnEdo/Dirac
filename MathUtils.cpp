@@ -29,6 +29,12 @@ bool areRectanglesIntersecting(const Math::vec2& tCenterA, const Math::vec2& tDi
 }
 
 
+bool near(float tValue, float tReference, float tTollerance)
+{
+	return (std::abs(tValue - tReference) <= tTollerance);
+}
+
+
 };
 
 }

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "vec2.hpp"
+#include "vec3.hpp"
+#include "mat3.hpp"
 
 
 namespace Dirac
@@ -9,31 +10,25 @@ namespace Dirac
 namespace Physics
 {
 
-// Axis Aligned Bounding Box
-struct AABB
-{
-	Math::vec2 mDimensions;
-};
-
 
 struct Dynamics
 {
-	Math::vec2	mVelocity;
-	float 		mAngularVelocity;	// positive cc
+	Math::vec3	mVelocity;
+	Math::vec3	mOmega;			// angular velocity
 };
 
 
 struct Forces
 {
-	Math::vec2 	mForce;
-	float 		mTorque;
+	Math::vec3 	mForce;
+	Math::vec3	mTorque;
 };
 
 
 struct Inertia
 {	
-	float	mMass;
-	float 	mMomentOfInertia;
+	float		mMass;
+	Math::mat3	mInertia;
 };
 
 };

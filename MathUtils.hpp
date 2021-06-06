@@ -25,6 +25,8 @@ bool areRectanglesIntersecting(const Math::vec2& tCenterA, const Math::vec2& tDi
 			       const Math::vec2& tCenterB, const Math::vec2& tDimensionsB);
 
 
+bool near(float tValue, float tReference, float tTollerance);
+
 };
 
 };
