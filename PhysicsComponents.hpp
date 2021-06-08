@@ -22,6 +22,10 @@ struct Forces
 {
 	Math::vec3 	mForce;
 	Math::vec3	mTorque;
+
+	// Damping constants
+	float 		mCRotational 	{ 0.0 };
+	float		mCLinear	{ 0.0 };
 };
 
 

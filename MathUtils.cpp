@@ -35,6 +35,14 @@ bool near(float tValue, float tReference, float tTollerance)
 }
 
 
+Math::mat3 cross(const Math::vec3& tV)
+{
+	return Math::mat3(Math::vec3(0.0f, -tV.z, tV.y),
+			  Math::vec3(tV.z, 0.0f, -tV.x),
+			  Math::vec3(-tV.y, tV.x, 0.0f));
+}
+
+
 };
 
 }

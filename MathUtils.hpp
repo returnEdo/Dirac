@@ -1,6 +1,9 @@
 #pragma once
 
 #include "vec2.hpp"
+#include "vec3.hpp"
+#include "mat3.hpp"
+
 
 namespace Dirac
 {
@@ -26,6 +29,8 @@ bool areRectanglesIntersecting(const Math::vec2& tCenterA, const Math::vec2& tDi
 
 
 bool near(float tValue, float tReference, float tTollerance);
+
+Math::mat3 cross(const Math::vec3& tV);
 
 };
 

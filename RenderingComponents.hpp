@@ -7,6 +7,7 @@
 #include "vec3.hpp"
 #include "vec2.hpp"
 #include "mat3.hpp"
+#include "Rotor.hpp"
 
 
 
@@ -44,6 +45,8 @@ struct Transform
 	Math::vec3 	mPosition;
 	Math::mat3 	mAttitude;
 	Math::mat3	mShear;
+
+	Math::Rotor	mRotor;
 };
 
 
