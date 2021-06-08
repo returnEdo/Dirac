@@ -13,21 +13,23 @@ namespace Math
 {
 
 
-void Rotor::updateMatrix(void)
+Math::mat3 Rotor::getMatrixForm(void)
 {
-	// Matrix representation of the rotor
+	Math::mat3 lMat;
 
-	tMatrixForm.row1 = Math::vec3(a*a - b*b + c*c - d*d,
-				      2.0f * (-a*b + c*d),
-				      2.0f * (a*d + b*c));
-	tMatrixForm.row2 = Math::vec3(2.0f * (a*b + c*d),
-				      a*a - b*b - c*c + d*d,
-				      2.0f * (-a*c + b*d));
-	tMatrixForm.row3 = Math::vec3(2.0f * (-a*d + b*c),
-				      2.0f * (a*c + b*d),
-				      a*a + b*b - c*c - d*d);
+	lMat.row1 = Math::vec3(a*a - b*b + c*c - d*d,
+	          	       2.0f * (-a*b + c*d),
+	         	       2.0f * (a*d + b*c));
+	lMat.row2 = Math::vec3(2.0f * (a*b + c*d),
+	         	       a*a - b*b - c*c + d*d,
+	         	       2.0f * (-a*c + b*d));
+	lMat.row3 = Math::vec3(2.0f * (-a*d + b*c),
+			       2.0f * (a*c + b*d),
+			       a*a + b*b - c*c - d*d);
 
-	tMatrixForm.buildCol();
+	lMat.buildCol();
+
+	return lMat;
 }
 
 void Rotor::normalize(void)

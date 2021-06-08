@@ -43,10 +43,8 @@ struct TextureVertex
 struct Transform
 {
 	Math::vec3 	mPosition;
-	Math::mat3 	mAttitude;
-	Math::mat3	mShear;
-
 	Math::Rotor	mRotor;
+	Math::mat3	mShear;
 };
 
 

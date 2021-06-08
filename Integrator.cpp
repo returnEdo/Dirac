@@ -4,6 +4,7 @@
 
 #include "Manager.hpp"
 #include "MathUtils.hpp"
+#include "DiracMacros.hpp"
 
 
 extern Dirac::Manager gManager;
@@ -34,7 +35,7 @@ void Integrator::updateEntity(EntityID tID, float tDt)
 			      Math::cross(lInertia.mInertia * lDynamics.mOmega) * (1.0 - mTheta) +
 			      lIdentity * lForces.mCRotational * (1.0 - mTheta));
 	
-	lDynamics.mOmega = inv(lAomega) * (lBomega * lDynamics.mOmega + transpose(lTransform.mAttitude) * lForces.mTorque);
+	lDynamics.mOmega = inv(lAomega) * (lBomega * lDynamics.mOmega + transpose(lTransform.mRotor.getMatrixForm()) * lForces.mTorque);
 
 	// STEP 2: rotor update
 	Math::Rotor 	rot = lTransform.mRotor;
@@ -54,13 +55,16 @@ void Integrator::updateEntity(EntityID tID, float tDt)
 	lDynamics.mVelocity = (lBeta * lDynamics.mVelocity + lForces.mForce / lInertia.mMass) / lAlpha;
 
 	// STEP 4: position update
-	lTransform.mPosition = lTransform.mPosition + tDt * (mTheta * lDynamics.mVelocity + (1.0f - mTheta) * lVold);
+	lTransform.mPosition += tDt * (mTheta * lDynamics.mVelocity + (1.0f - mTheta) * lVold);
+
+	// STEP 5: clear forces
+	PRINT_AUTO(lTransform.mPosition);
+	lForces.clear();
 }
 
 
 void Integrator::update(float tDt)
 {
-
 	for (EntityID lID: mEntities)
 	{
 		updateEntity(lID, tDt);

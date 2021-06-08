@@ -17,9 +17,8 @@ namespace Math
 class Rotor
 {
 	private:
-
-	mat3 tMatrixForm;
-	static constexpr float mNEAR_TOLL = .00001;
+	
+	static constexpr float mNEAR_TOLL = .0001;
 
 	public:
 	
@@ -46,11 +45,11 @@ class Rotor
 	Rotor(void):
 		Rotor(0.0f, vec3(0.0f, 0.0f, 1.0f))		{}
 
-	inline mat3& getMatrix(void)		{ return tMatrixForm; }
+
 	inline float getNorm(void) const	{ return std::sqrt(a*a + b*b + c*c + d*d); }
-	
-	void updateMatrix(void);
 	void normalize(void);
+	
+	Math::mat3 getMatrixForm(void);
 	
 	friend std::ostream& operator <<(std::ostream& tOs, Rotor& tRotor);
 };

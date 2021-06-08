@@ -78,7 +78,7 @@ int main()
 	gManager.addComponent<Transform>(id1,
 					 {
 						 Math::vec3(),
-						 Math::mat3(Math::vec3(1.0f, .0f, .0f), .0f),
+						 Math::Rotor(0.0f, Math::vec3(0.0f, 1.0f, 0.0f)),
 						 Math::mat3(Math::vec3(1.0f))
 					 });
 
@@ -93,6 +93,8 @@ int main()
 					     &quadVertices
 				     });
 	
+	gManager.addComponent<Physics::Dynamics>(id1, {Math::vec3(), Math::vec3()});
+	gManager.addComponent<Physics::Forces>(id1, {Math::vec3(), Math::vec3()});
 	gManager.addComponent<Physics::Inertia>(id1, { 1.0f, Math::mat3(Math::vec3(1.0f, 1.0f, 1.0f)) });
 					
 
@@ -102,7 +104,7 @@ int main()
 	gManager.addComponent<Transform>(cameraID,
 					 {	
 						Math::vec3(.0f, .0f, 5.0f),
-						Math::mat3(Math::vec3(.0f, 1.0f, .0f), .0f),
+						Math::Rotor(0.0f, Math::vec3(.0f, 1.0f, .0f)),
 						Math::mat3()
 					 });
 	gManager.addComponent<View>(cameraID, {});
@@ -111,6 +113,7 @@ int main()
 	
 	// Get compoenent references to play with
 	Transform& transform 	= gManager.getComponent<Transform>(id1);
+	Physics::Forces& forces = gManager.getComponent<Physics::Forces>(id1);
 	Transform& camera	= gManager.getComponent<Transform>(cameraID);
 	Color& color1		= gManager.getComponent<Color>(id1);
 
@@ -125,11 +128,19 @@ int main()
 
 		screenManager.clear();
 
-//		pIntegrator -> update(clock.refreshTimer());
-		pBatchRenderer -> update(cameraID);
+		pIntegrator 	-> update(clock.refreshTimer());
+		pBatchRenderer 	-> update(cameraID);
 
 		screenManager.update();
 
+		if (screenManager.isPressedOrHeld(GLFW_KEY_ESCAPE))
+		{
+			screenManager.shouldDie();
+		}
+		if (screenManager.isPressedOrHeld(GLFW_KEY_SPACE))
+		{
+			forces.mForce = Math::vec3(0.0f, 100.0f, 0.0f);
+		}
 	}
 
 	return 0;

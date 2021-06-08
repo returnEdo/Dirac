@@ -76,7 +76,7 @@ void DynamicBatchRenderer::update(EntityID tCameraID)
 
 	unsigned int lCurrentVertex = 0;
 	
-	Math::mat3 lCameraAttitudeT = transpose(lCameraTransform.mAttitude);
+	Math::mat3 lCameraAttitudeT = transpose(lCameraTransform.mRotor.getMatrixForm());
 	
 	for (EntityID entity: mEntities)
 	{
@@ -88,8 +88,8 @@ void DynamicBatchRenderer::update(EntityID tCameraID)
 		for (const Vertex& vertex: *lModel.mPVertices)
 		{
 			// Position and normal in camera view
-			lVertex.mPosition 	= lCameraAttitudeT * (lEntityTransform.mAttitude * (lEntityTransform.mShear * vertex.mPosition) + lEntityTransform.mPosition - lCameraTransform.mPosition);
-			lVertex.mNormal 	= lEntityTransform.mAttitude * vertex.mNormal;
+			lVertex.mPosition 	= lCameraAttitudeT * (lEntityTransform.mRotor.getMatrixForm() * (lEntityTransform.mShear * vertex.mPosition) + lEntityTransform.mPosition - lCameraTransform.mPosition);
+			lVertex.mNormal 	= lEntityTransform.mRotor.getMatrixForm() * vertex.mNormal;
 			lVertex.mColor 		= lColor.mColor;
 			lVertex.mAlpha 		= lColor.mAlpha;
 

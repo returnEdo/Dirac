@@ -63,7 +63,7 @@ void BatchLineRenderer::update(EntityID tCameraID)
 	auto lCameraTransform = gManager.getComponent<Transform>(tCameraID);
 	auto lCameraView = gManager.getComponent<View>(tCameraID);
 	
-	Math::mat3 lCameraAttitudeT = transpose(lCameraTransform.mAttitude);
+	Math::mat3 lCameraAttitudeT = transpose(lCameraTransform.mRotor.getMatrixForm());
 
 	mShader -> setUniform("uCameraDeltax", lCameraView.mDeltax);
 	mShader -> setUniform("uCameraDeltaz", lCameraView.mDeltaz);

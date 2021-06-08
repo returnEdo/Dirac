@@ -74,7 +74,7 @@ void BatchTextureRenderer::update(EntityID tCameraID)
 {
 	Transform lCameraTransform = gManager.getComponent<Transform>(tCameraID);
 	View lCameraView = gManager.getComponent<View>(tCameraID);
-	Math::mat3 lCameraAttitudeT = transpose(lCameraTransform.mAttitude);
+	Math::mat3 lCameraAttitudeT = transpose(lCameraTransform.mRotor.getMatrixForm());
 
 	mTexture 	-> bind();
 	mShader 	-> bind();
@@ -106,7 +106,7 @@ void BatchTextureRenderer::update(EntityID tCameraID)
 		
 		for (const TextureVertex& vertex: Models::nQuadVertex)
 		{	
-			lVertex.mPosition 	= lCameraAttitudeT * (lEntityTransform.mAttitude * (lEntityTransform.mShear * vertex.mPosition) + lEntityTransform.mPosition - lCameraTransform.mPosition);
+			lVertex.mPosition 	= lCameraAttitudeT * (lEntityTransform.mRotor.getMatrixForm() * (lEntityTransform.mShear * vertex.mPosition) + lEntityTransform.mPosition - lCameraTransform.mPosition);
 			lVertex.mTextureUV	= lTexture.mBottomLeft + Math::vec2(vertex.mTextureUV.x * lTexture.mWidth,
 										 vertex.mTextureUV.y * lTexture.mHeight);
 			lVertex.mTextureUV.x 	/= lTextureWidth_float;
