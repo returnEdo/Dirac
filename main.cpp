@@ -94,7 +94,7 @@ int main()
 				     });
 	
 	gManager.addComponent<Physics::Dynamics>(id1, {Math::vec3(), Math::vec3()});
-	gManager.addComponent<Physics::Forces>(id1, {Math::vec3(), Math::vec3()});
+	gManager.addComponent<Physics::Forces>(id1, {Math::vec3(), Math::vec3(), 2.0f, 2.0f});
 	gManager.addComponent<Physics::Inertia>(id1, { 1.0f, Math::mat3(Math::vec3(1.0f, 1.0f, 1.0f)) });
 					
 
@@ -137,9 +137,21 @@ int main()
 		{
 			screenManager.shouldDie();
 		}
-		if (screenManager.isPressedOrHeld(GLFW_KEY_SPACE))
+		if (screenManager.isPressedOrHeld(GLFW_KEY_RIGHT))
 		{
-			forces.mForce = Math::vec3(0.0f, 100.0f, 0.0f);
+			forces.mTorque = Math::vec3(10.0f, 10.0f, 0.0f);
+		}
+		if (screenManager.isPressedOrHeld(GLFW_KEY_LEFT))
+		{
+			forces.mTorque = Math::vec3(-10.0f, -10.0f, 0.0f);
+		}
+		if (screenManager.isPressedOrHeld(GLFW_KEY_UP))
+		{
+			forces.mForce = Math::vec3(0.0f, 10.0f, 0.0f);
+		}
+		if (screenManager.isPressedOrHeld(GLFW_KEY_DOWN))
+		{
+			forces.mForce = Math::vec3(0.0f, -10.0f, 0.0f);
 		}
 	}
 
